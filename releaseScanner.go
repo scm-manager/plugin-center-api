@@ -34,37 +34,35 @@ func readPluginDirectory(pluginDirectory string) *Plugin {
 	if err != nil {
 		return nil
 	}
-	data, err := unmarshalFrontMatter(indexContent)
+	var plugin Plugin
+	err = unmarshalFrontMatter(indexContent, &plugin)
 	if err == nil {
-		return &Plugin{
-			name:        data.Name,
-			displayName: data.DisplayName,
-			description: data.Description,
-			category:    data.Category,
-			author:      data.Author,
-		}
+		return &plugin
 	} else {
 		return nil
 	}
 }
 
-type pluginFrontMatter struct {
-	Name        string `yaml:"name"`
-	DisplayName string `yaml:"displayName"`
-	Description string `yaml:"description"`
-	Category    string `yaml:"category"`
-	Author      string `yaml:"author"`
-}
-
-func unmarshalFrontMatter(b []byte) (pluginFrontMatter, error) {
+func unmarshalFrontMatter(b []byte, plugin *Plugin) error {
 	var frontMatterDelimiter = []byte("---")
-	var data pluginFrontMatter
 
 	if !bytes.HasPrefix(b, frontMatterDelimiter) {
-		return data, errors.New("index.md file has no front matter part")
+		return errors.New("index.md file has no front matter part")
 	}
 
 	parts := bytes.SplitN(b, frontMatterDelimiter, 3)
-	err := yaml.Unmarshal(parts[1], &data)
-	return data, err
+
+	dataMap := map[string]string{}
+	err := yaml.Unmarshal(parts[1], &dataMap)
+	if err != nil {
+		return err
+	}
+
+	(*plugin).name = dataMap["name"]
+	(*plugin).displayName = dataMap["displayName"]
+	(*plugin).description = dataMap["description"]
+	(*plugin).category = dataMap["category"]
+	(*plugin).author = dataMap["author"]
+
+	return nil
 }
