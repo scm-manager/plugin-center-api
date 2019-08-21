@@ -37,10 +37,39 @@ func readPluginDirectory(pluginDirectory string) *Plugin {
 	var plugin Plugin
 	err = unmarshalFrontMatter(indexContent, &plugin)
 	if err == nil {
+		releases := readReleases(filepath.Join(pluginDirectory, "releases"))
+		plugin.Releases = releases
 		return &plugin
 	} else {
 		return nil
 	}
+}
+
+func readReleases(releaseDirectory string) []Release {
+	var releases []Release
+	releaseFiles, err := ioutil.ReadDir(releaseDirectory)
+	if err != nil {
+		return releases
+	}
+
+	for _, releaseFile := range releaseFiles {
+		release, err := readRelease(filepath.Join(releaseDirectory, releaseFile.Name()))
+		if err != nil {
+			panic("could not read release file")
+		}
+		releases = append(releases, release)
+	}
+	return releases
+}
+
+func readRelease(releaseFileName string) (Release, error) {
+	releaseYaml, err := ioutil.ReadFile(releaseFileName)
+	if err != nil {
+		return Release{}, err
+	}
+	var release Release
+	err = yaml.Unmarshal(releaseYaml, &release)
+	return release, nil
 }
 
 func unmarshalFrontMatter(b []byte, plugin *Plugin) error {
@@ -52,17 +81,10 @@ func unmarshalFrontMatter(b []byte, plugin *Plugin) error {
 
 	parts := bytes.SplitN(b, frontMatterDelimiter, 3)
 
-	dataMap := map[string]string{}
-	err := yaml.Unmarshal(parts[1], &dataMap)
+	err := yaml.Unmarshal(parts[1], plugin)
 	if err != nil {
 		return err
 	}
-
-	(*plugin).name = dataMap["name"]
-	(*plugin).displayName = dataMap["displayName"]
-	(*plugin).description = dataMap["description"]
-	(*plugin).category = dataMap["category"]
-	(*plugin).author = dataMap["author"]
 
 	return nil
 }

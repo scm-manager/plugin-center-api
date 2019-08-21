@@ -19,7 +19,7 @@ func TestIfReleaseFilesAreRead(t *testing.T) {
 	plugins, err := scanDirectory(configuration.DescriptorDirectory)
 
 	assert.Nil(t, err, "unexpected error reading directory", err)
-	assert.Equal(t, 3, len(plugins), "wrong number of plugins")
+	assert.Len(t, plugins, 3, "wrong number of plugins")
 }
 
 func TestIfPluginMetadataIsRead(t *testing.T) {
@@ -28,16 +28,32 @@ func TestIfPluginMetadataIsRead(t *testing.T) {
 	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
 	plugin := findPluginByName(plugins, "scm-auth-ldap-plugin")
 
-	assert.Equal(t, "scm-auth-ldap-plugin", plugin.name)
-	assert.Equal(t, "LDAP", plugin.displayName)
-	assert.Equal(t, "LDAP Authentication", plugin.description)
-	assert.Equal(t, "authentication", plugin.category)
-	assert.Equal(t, "Cloudogu GmbH", plugin.author)
+	assert.Equal(t, "scm-auth-ldap-plugin", plugin.Name)
+	assert.Equal(t, "LDAP", plugin.DisplayName)
+	assert.Equal(t, "LDAP Authentication", plugin.Description)
+	assert.Equal(t, "authentication", plugin.Category)
+	assert.Equal(t, "Cloudogu GmbH", plugin.Author)
+}
+
+func TestIfReleasesAreRead(t *testing.T) {
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
+
+	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugin := findPluginByName(plugins, "scm-cas-plugin")
+
+	assert.Equal(t, 2, len(plugin.Releases), "wrong number of releases")
+	release := plugin.Releases[0]
+	assert.Equal(t, "1.0.0", release.Version, "wrong version for release")
+	assert.Equal(t, "2009-01-01T12:00:00+01:00", release.Date, "wrong date for release")
+	assert.Equal(t, "https://download.scm-manager.org/plugins/1.0.0/scm-cas-plugin.smp", release.Url, "wrong url for release")
+	assert.Equal(t, "f464372baf1ce0d7d0f67e5283f7c4210e24dcf330f955a3261317a77330c19f", release.Checksum, "wrong checksum for release")
+	assert.Equal(t, "linux", release.Conditions.Os, "wrong os for release conditions")
+	assert.Equal(t, "amd64", release.Conditions.Arch, "wrong arch for release conditions")
 }
 
 func findPluginByName(plugins []Plugin, name string) *Plugin {
 	for _, plugin := range plugins {
-		if name == plugin.name {
+		if name == plugin.Name {
 			return &plugin
 		}
 	}

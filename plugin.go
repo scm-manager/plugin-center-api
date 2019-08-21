@@ -1,23 +1,24 @@
 package main
 
-type Condition struct {
-	name  string
-	value string
+type Conditions struct {
+	Os         string `yaml:"os"`
+	Arch       string `yaml:"arch"`
+	MinVersion string `yaml:"minVersion"`
 }
 
 type Release struct {
-	version    string
-	conditions []Condition
-	url        string
-	date       string
-	checksum   string
+	Version    string     `yaml:"tag"`
+	Conditions Conditions `yaml:"conditions"`
+	Url        string     `yaml:"url"`
+	Date       string     `yaml:"date"`
+	Checksum   string     `yaml:"checksum"`
 }
 
 type Plugin struct {
-	name        string
-	displayName string
-	description string
-	category    string
+	Name        string `yaml:"name"`
+	DisplayName string `yaml:"displayName"`
+	Description string `yaml:"description"`
+	Category    string `yaml:"category"`
 	Releases    []Release
-	author      string
+	Author      string `yaml:"author"`
 }
