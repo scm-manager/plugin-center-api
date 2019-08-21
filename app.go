@@ -2,5 +2,12 @@ package main
 
 func main() {
 	configuration := readConfiguration()
-	print(configuration.DescriptorDirectory)
+
+	plugins, err := scanDirectory(configuration.DescriptorDirectory)
+
+	if err != nil {
+		panic(err)
+	}
+
+	println(plugins)
 }

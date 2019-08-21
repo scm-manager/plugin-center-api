@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 )
 
 func scanDirectory(directory string) ([]Plugin, error) {
@@ -53,11 +54,13 @@ func readReleases(releaseDirectory string) []Release {
 	}
 
 	for _, releaseFile := range releaseFiles {
-		release, err := readRelease(filepath.Join(releaseDirectory, releaseFile.Name()))
-		if err != nil {
-			panic("could not read release file")
+		if strings.HasSuffix(releaseFile.Name(), ".yaml") || strings.HasSuffix(releaseFile.Name(), ".yml") {
+			release, err := readRelease(filepath.Join(releaseDirectory, releaseFile.Name()))
+			if err != nil {
+				panic("could not read release file")
+			}
+			releases = append(releases, release)
 		}
-		releases = append(releases, release)
 	}
 	return releases
 }
