@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/gorilla/mux"
+)
+
 func main() {
 	configuration := readConfiguration()
 
@@ -9,5 +13,6 @@ func main() {
 		panic(err)
 	}
 
-	println(plugins)
+	r := mux.NewRouter()
+	r.Handle("/api/v1/plugins", NewPluginHandler(plugins))
 }
