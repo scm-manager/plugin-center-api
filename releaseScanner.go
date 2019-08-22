@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -68,6 +69,7 @@ func readReleases(releaseDirectory string) []Release {
 			releases = append(releases, release)
 		}
 	}
+	sort.Slice(releases, less(releases))
 	return releases
 }
 

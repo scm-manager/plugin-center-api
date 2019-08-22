@@ -51,6 +51,18 @@ func TestIfReleasesAreRead(t *testing.T) {
 	assert.Equal(t, "amd64", release.Conditions.Arch, "wrong arch for release conditions")
 }
 
+func TestReleasesAreSorted(t *testing.T) {
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
+
+	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugin := findPluginByName(plugins, "scm-script-plugin")
+
+	assert.Equal(t, 3, len(plugin.Releases), "wrong number of releases")
+	assert.Equal(t, "1.0.0", plugin.Releases[0].Version, "wrong version for release")
+	assert.Equal(t, "1.0.1", plugin.Releases[1].Version, "wrong version for release")
+	assert.Equal(t, "1.0.10", plugin.Releases[2].Version, "wrong version for release")
+}
+
 func findPluginByName(plugins []Plugin, name string) *Plugin {
 	for _, plugin := range plugins {
 		if name == plugin.Name {
