@@ -2,9 +2,10 @@ package main
 
 import (
 	"bytes"
-	"errors"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"strings"
 )
@@ -16,7 +17,7 @@ func scanDirectory(directory string) ([]Plugin, error) {
 	pluginDirectories, err := ioutil.ReadDir(directory)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not open plugin directory "+directory)
 	}
 
 	for _, pluginDirectory := range pluginDirectories {
@@ -31,8 +32,10 @@ func scanDirectory(directory string) ([]Plugin, error) {
 
 func readPluginDirectory(pluginDirectory string) *Plugin {
 	indexFileName := filepath.Join(pluginDirectory, "index.md")
+	log.Println("reading plugin file", indexFileName)
 	indexContent, err := ioutil.ReadFile(indexFileName)
 	if err != nil {
+		log.Println("no index.md file found in directory", pluginDirectory)
 		return nil
 	}
 	var plugin Plugin
@@ -42,6 +45,7 @@ func readPluginDirectory(pluginDirectory string) *Plugin {
 		plugin.Releases = releases
 		return &plugin
 	} else {
+		log.Fatalln("could not read  plugin directory", pluginDirectory)
 		return nil
 	}
 }
@@ -55,9 +59,11 @@ func readReleases(releaseDirectory string) []Release {
 
 	for _, releaseFile := range releaseFiles {
 		if strings.HasSuffix(releaseFile.Name(), ".yaml") || strings.HasSuffix(releaseFile.Name(), ".yml") {
-			release, err := readRelease(filepath.Join(releaseDirectory, releaseFile.Name()))
+			releaseFilePath := filepath.Join(releaseDirectory, releaseFile.Name())
+			log.Println("reading release file", releaseFilePath)
+			release, err := readRelease(releaseFilePath)
 			if err != nil {
-				panic("could not read release file")
+				log.Fatalln("could not read release file", releaseFilePath)
 			}
 			releases = append(releases, release)
 		}
@@ -68,7 +74,7 @@ func readReleases(releaseDirectory string) []Release {
 func readRelease(releaseFileName string) (Release, error) {
 	releaseYaml, err := ioutil.ReadFile(releaseFileName)
 	if err != nil {
-		return Release{}, err
+		return Release{}, errors.Wrap(err, "could not read release file "+releaseFileName)
 	}
 	var release Release
 	err = yaml.Unmarshal(releaseYaml, &release)
@@ -86,7 +92,7 @@ func unmarshalFrontMatter(b []byte, plugin *Plugin) error {
 
 	err := yaml.Unmarshal(parts[1], plugin)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not parse front matter content")
 	}
 
 	return nil

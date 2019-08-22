@@ -44,6 +44,7 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 
 		data, err := json.Marshal(response)
 		if err != nil {
+			log.Println("could not marshal result for plugin call", err)
 			http.Error(w, "failed to marshal response", 500)
 		}
 		_, err = w.Write(data)
