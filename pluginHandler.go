@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-version"
 	"log"
 	"net/http"
@@ -80,7 +81,8 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 		return RequestConditions{}, err
 	}
 	queryParameters := r.Form
-	requestVersion, err := version.NewVersion(queryParameters.Get("version"))
+	vars := mux.Vars(r)
+	requestVersion, err := version.NewVersion(vars["version"])
 	if err != nil {
 		return RequestConditions{}, err
 	}

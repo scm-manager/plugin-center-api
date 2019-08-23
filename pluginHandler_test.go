@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -8,13 +9,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=64", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -22,13 +17,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=64", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -41,13 +30,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=64", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -58,13 +41,7 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.0&os=linux&arch=64", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.0?os=linux&arch=64", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -73,13 +50,7 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=windows&arch=64", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=windows&arch=64", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -88,13 +59,7 @@ func TestPluginHandlerFiltersForOs(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForArch(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=32", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=32", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -102,18 +67,27 @@ func TestPluginHandlerFiltersForArch(t *testing.T) {
 }
 
 func TestPluginHandlerTreatsOsAndArchAsOptional(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := NewPluginHandler(testData)
-	handler.ServeHTTP(rr, req)
+	rr := initRouter("/api/v1/plugins/2.0.1", t)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
 	assert.Contains(t, rr.Body.String(), `"name":"ssh-plugin"`)
 	assert.Contains(t, rr.Body.String(), `"version":"2.0"`)
+}
+
+func initRouter(url string, t *testing.T) *httptest.ResponseRecorder {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/api/v1/plugins/{version}", NewPluginHandler(testData))
+	router.ServeHTTP(rr, req)
+
+	return rr
 }
 
 var testData = []Plugin{

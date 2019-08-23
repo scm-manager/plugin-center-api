@@ -17,7 +17,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Handle("/api/v1/plugins", NewPluginHandler(plugins))
+	r.Handle("/api/v1/plugins/{version}", NewPluginHandler(plugins))
 
 	port := os.Getenv("PORT")
 	if port == "" {
