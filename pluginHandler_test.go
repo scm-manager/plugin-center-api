@@ -8,7 +8,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=64", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=64", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=64", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,13 +52,13 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rr.Code)
 
 	assert.Contains(t, rr.Body.String(), `"conditions":{`)
-	assert.Contains(t, rr.Body.String(), `"os":"Linux"`)
+	assert.Contains(t, rr.Body.String(), `"os":"linux"`)
 	assert.Contains(t, rr.Body.String(), `"arch":"64"`)
 	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.1"`)
 }
 
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.0&os=Linux&arch=64", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.0&os=linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Windows&arch=64", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=windows&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestPluginHandlerFiltersForOs(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForArch(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=32", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=linux&arch=32", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +111,7 @@ var testData = []Plugin{
 			{
 				Version: "2.0",
 				Conditions: Conditions{
-					Os:         "Linux",
+					Os:         "linux",
 					Arch:       "64",
 					MinVersion: "2.0.1",
 				},
@@ -122,7 +122,7 @@ var testData = []Plugin{
 			{
 				Version: "1.1",
 				Conditions: Conditions{
-					Os:         "Linux",
+					Os:         "linux",
 					Arch:       "64",
 					MinVersion: "2.0.0",
 				},
@@ -133,7 +133,7 @@ var testData = []Plugin{
 			{
 				Version: "0.1",
 				Conditions: Conditions{
-					Os: "Linux",
+					Os: "linux",
 				},
 				Url:      "http://example.com",
 				Date:     "1.01.2019",
@@ -151,7 +151,7 @@ var testData = []Plugin{
 			{
 				Version: "1.0",
 				Conditions: Conditions{
-					Os: "Windows",
+					Os: "windows",
 				},
 				Url:      "http://example.com",
 				Date:     "1.01.2019",
