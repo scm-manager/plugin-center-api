@@ -2,6 +2,9 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"log"
+	"net/http"
+	"os"
 )
 
 func main() {
@@ -15,4 +18,16 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Handle("/api/v1/plugins", NewPluginHandler(plugins))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+
+	log.Println("start plugin center api on port", port)
+
+	err = http.ListenAndServe(":"+port, r)
+	if err != nil {
+		log.Fatal("http server returned err: ", err)
+	}
 }
