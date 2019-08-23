@@ -33,11 +33,30 @@ type Response struct {
 	EmbeddedPlugins Embedded `json:"_embedded"`
 }
 
+type RequestConditions struct {
+	Os         string
+	Arch       string
+	MinVersion string
+}
+
 func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var plugins []PluginResult
+		var pluginResults []PluginResult
+
+		requestConditions, err := extractRequestConditions(r)
+		if err != nil {
+			log.Println("could not parse form data for request", err)
+			w.WriteHeader(400)
+			w.Write([]byte("could not parse form data for request"))
+			return
+		}
+
+		for _, plugin := range plugins {
+			pluginResults = appendIfOk(pluginResults, plugin, requestConditions)
+		}
+
 		embedded := make(map[string]PluginResults)
-		embedded["plugins"] = plugins
+		embedded["plugins"] = pluginResults
 		response := Response{EmbeddedPlugins: embedded}
 
 		w.Header().Add("Content-Type", "application/json")
@@ -52,4 +71,50 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			log.Println("failed to write response", err)
 		}
 	}
+}
+
+func extractRequestConditions(r *http.Request) (RequestConditions, error) {
+	err := r.ParseForm()
+	if err != nil {
+		return RequestConditions{}, err
+	}
+	queryParameters := r.Form
+	requestConditions := RequestConditions{
+		Os:         queryParameters.Get("os"),
+		Arch:       "",
+		MinVersion: "",
+	}
+	return requestConditions, nil
+}
+
+func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions) []PluginResult {
+	if len(plugin.Releases) > 0 {
+		result := PluginResult{
+			Name:        plugin.Name,
+			DisplayName: plugin.DisplayName,
+			Description: plugin.Description,
+			Category:    plugin.Category,
+			Version:     plugin.Releases[0].Version,
+			Author:      plugin.Author,
+			Conditions:  extractConditions(plugin.Releases[0].Conditions),
+			Links:       nil,
+		}
+		return append(results, result)
+	} else {
+		return results
+	}
+}
+
+func extractConditions(conditions Conditions) ConditionMap {
+	conditionMap := make(map[string]string)
+	if conditions.Os != "" {
+		conditionMap["os"] = conditions.Os
+	}
+	if conditions.Arch != "" {
+		conditionMap["arch"] = conditions.Arch
+	}
+	if conditions.MinVersion != "" {
+		conditionMap["minVersion"] = conditions.MinVersion
+	}
+	return conditionMap
 }

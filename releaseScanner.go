@@ -69,7 +69,9 @@ func readReleases(releaseDirectory string) []Release {
 			releases = append(releases, release)
 		}
 	}
-	sort.Slice(releases, less(releases))
+
+	sort.SliceStable(releases, func(i1 int, i2 int) bool { return less(releases)(i2, i1) })
+
 	return releases
 }
 
