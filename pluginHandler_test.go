@@ -8,7 +8,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,6 +55,21 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"os":"Linux"`)
 	assert.Contains(t, rr.Body.String(), `"arch":"64"`)
 	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.1"`)
+}
+
+func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
+	req, err := http.NewRequest("GET", "/?version=2.0.0", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewPluginHandler(testData)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), `"version":"1.1"`)
+	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.0"`)
 }
 
 var testData = []Plugin{

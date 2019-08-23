@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/hashicorp/go-version"
 	"log"
 	"net/http"
 )
@@ -34,9 +35,9 @@ type Response struct {
 }
 
 type RequestConditions struct {
-	Os         string
-	Arch       string
-	MinVersion string
+	Os      string
+	Arch    string
+	Version version.Version
 }
 
 func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
@@ -79,30 +80,44 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 		return RequestConditions{}, err
 	}
 	queryParameters := r.Form
+	version, err := version.NewVersion(queryParameters.Get("version"))
+	if err != nil {
+		return RequestConditions{}, err
+	}
 	requestConditions := RequestConditions{
-		Os:         queryParameters.Get("os"),
-		Arch:       "",
-		MinVersion: "",
+		Os:      queryParameters.Get("os"),
+		Arch:    queryParameters.Get("arch"),
+		Version: *version,
 	}
 	return requestConditions, nil
 }
 
 func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions) []PluginResult {
-	if len(plugin.Releases) > 0 {
-		result := PluginResult{
-			Name:        plugin.Name,
-			DisplayName: plugin.DisplayName,
-			Description: plugin.Description,
-			Category:    plugin.Category,
-			Version:     plugin.Releases[0].Version,
-			Author:      plugin.Author,
-			Conditions:  extractConditions(plugin.Releases[0].Conditions),
-			Links:       nil,
+	for _, release := range plugin.Releases {
+		if conditionsMatch(conditions, release.Conditions) {
+			result := PluginResult{
+				Name:        plugin.Name,
+				DisplayName: plugin.DisplayName,
+				Description: plugin.Description,
+				Category:    plugin.Category,
+				Version:     release.Version,
+				Author:      plugin.Author,
+				Conditions:  extractConditions(release.Conditions),
+				Links:       nil,
+			}
+			return append(results, result)
 		}
-		return append(results, result)
-	} else {
-		return results
 	}
+	return results
+}
+
+func conditionsMatch(requestConditions RequestConditions, releaseConditions Conditions) bool {
+	minVersion, err := version.NewVersion(releaseConditions.MinVersion)
+	if err != nil {
+		log.Println("could not parse version string", releaseConditions.MinVersion, "- ignoring release")
+		return false
+	}
+	return requestConditions.Version.GreaterThanOrEqual(minVersion)
 }
 
 func extractConditions(conditions Conditions) ConditionMap {
