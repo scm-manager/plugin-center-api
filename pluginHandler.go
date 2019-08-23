@@ -112,10 +112,10 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 }
 
 func conditionsMatch(requestConditions RequestConditions, releaseConditions Conditions) bool {
-	if releaseConditions.Os != "" && releaseConditions.Os != requestConditions.Os {
+	if releaseConditions.Os != "" && requestConditions.Os != "" && releaseConditions.Os != requestConditions.Os {
 		return false
 	}
-	if releaseConditions.Arch != "" && releaseConditions.Arch != requestConditions.Arch {
+	if releaseConditions.Arch != "" && requestConditions.Arch != "" && releaseConditions.Arch != requestConditions.Arch {
 		return false
 	}
 	if releaseConditions.MinVersion == "" {

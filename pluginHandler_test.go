@@ -101,6 +101,21 @@ func TestPluginHandlerFiltersForArch(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"version":"0.1"`)
 }
 
+func TestPluginHandlerTreatsOsAndArchAsOptional(t *testing.T) {
+	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewPluginHandler(testData)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), `"name":"ssh-plugin"`)
+	assert.Contains(t, rr.Body.String(), `"version":"2.0"`)
+}
+
 var testData = []Plugin{
 	{
 		Name:        "ssh-plugin",
