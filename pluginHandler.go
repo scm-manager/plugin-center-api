@@ -115,6 +115,9 @@ func conditionsMatch(requestConditions RequestConditions, releaseConditions Cond
 	if releaseConditions.Os != "" && releaseConditions.Os != requestConditions.Os {
 		return false
 	}
+	if releaseConditions.Arch != "" && releaseConditions.Arch != requestConditions.Arch {
+		return false
+	}
 	if releaseConditions.MinVersion == "" {
 		return true
 	}

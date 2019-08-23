@@ -8,7 +8,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.0&os=Linux", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.0&os=Linux&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Windows", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Windows&arch=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,6 +85,20 @@ func TestPluginHandlerFiltersForOs(t *testing.T) {
 
 	assert.NotContains(t, rr.Body.String(), `"ssh-plugin"`)
 	assert.Contains(t, rr.Body.String(), `"ad-plugin"`)
+}
+
+func TestPluginHandlerFiltersForArch(t *testing.T) {
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux&arch=32", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewPluginHandler(testData)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), `"version":"0.1"`)
 }
 
 var testData = []Plugin{
@@ -111,6 +125,15 @@ var testData = []Plugin{
 					Os:         "Linux",
 					Arch:       "64",
 					MinVersion: "2.0.0",
+				},
+				Url:      "http://example.com",
+				Date:     "1.01.2019",
+				Checksum: "abc",
+			},
+			{
+				Version: "0.1",
+				Conditions: Conditions{
+					Os: "Linux",
 				},
 				Url:      "http://example.com",
 				Date:     "1.01.2019",
