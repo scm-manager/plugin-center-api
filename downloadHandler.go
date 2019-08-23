@@ -14,15 +14,6 @@ type UrlGenerator struct {
 	protocol string
 }
 
-var (
-	downloadCounter = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "scm_plugin_center_download_requests",
-		Help: "Total number of downloads",
-	}, []string{
-		"plugin", "version",
-	})
-)
-
 func NewUrlGenerator(r http.Request) UrlGenerator {
 	forwardedHost := r.Header.Get("X-Forwarded-Host")
 	forwardedProto := r.Header.Get("X-Forwarded-Proto")
@@ -43,31 +34,47 @@ func (u *UrlGenerator) DownloadUrl(plugin Plugin, version string) string {
 	return fmt.Sprintf("%v://%v/api/v1/download/%v/%v", u.protocol, u.host, plugin.Name, version)
 }
 
-func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		pluginName := vars["plugin"]
-		pluginVersion := vars["version"]
-
-		release := findRelease(plugins, pluginName, pluginVersion)
-
-		if release == nil {
-			log.Println("no plugin found for name", pluginName, "and version", pluginVersion)
-			w.WriteHeader(404)
-			return
-		}
-
-		downloadCounter.WithLabelValues(
-			pluginName,
-			pluginVersion,
-		).Inc()
-
-		http.Redirect(w, r, release.Url, http.StatusSeeOther)
-	}
+type DownloadHandler struct {
+	plugins []Plugin
 }
 
-func findRelease(plugins []Plugin, name string, version string) *Release {
-	for _, plugin := range plugins {
+var (
+	downloadCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "scm_plugin_center_download_requests",
+		Help: "Total number of downloads",
+	}, []string{
+		"plugin", "version",
+	})
+)
+
+func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
+	handler := DownloadHandler{plugins: plugins}
+	return handler.handle
+}
+
+func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	pluginName := vars["plugin"]
+	pluginVersion := vars["version"]
+
+	release := h.findRelease(pluginName, pluginVersion)
+
+	if release == nil {
+		log.Println("no plugin found for name", pluginName, "and version", pluginVersion)
+		w.WriteHeader(404)
+		return
+	}
+
+	downloadCounter.WithLabelValues(
+		pluginName,
+		pluginVersion,
+	).Inc()
+
+	http.Redirect(w, r, release.Url, http.StatusSeeOther)
+}
+
+func (h *DownloadHandler) findRelease(name string, version string) *Release {
+	for _, plugin := range h.plugins {
 		if plugin.Name == name {
 			for _, release := range plugin.Releases {
 				if release.Version == version {
