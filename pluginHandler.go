@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-version"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"log"
 	"net/http"
 )
@@ -41,6 +43,15 @@ type RequestConditions struct {
 	Version version.Version
 }
 
+var (
+	requestCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "scm_plugin_center_api_requests",
+		Help: "Total number of requests",
+	}, []string{
+		"version",
+	})
+)
+
 func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var pluginResults []PluginResult
@@ -52,6 +63,8 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			w.Write([]byte("could not parse form data for request"))
 			return
 		}
+
+		requestCounter.WithLabelValues(requestConditions.Version.String()).Inc()
 
 		for _, plugin := range plugins {
 			pluginResults = appendIfOk(pluginResults, plugin, requestConditions)
