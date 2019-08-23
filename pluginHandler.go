@@ -48,7 +48,7 @@ var (
 		Name: "scm_plugin_center_api_requests",
 		Help: "Total number of requests",
 	}, []string{
-		"version",
+		"version", "os", "arch",
 	})
 )
 
@@ -64,7 +64,11 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			return
 		}
 
-		requestCounter.WithLabelValues(requestConditions.Version.String()).Inc()
+		requestCounter.WithLabelValues(
+			requestConditions.Version.String(),
+			requestConditions.Arch,
+			requestConditions.Os,
+		).Inc()
 
 		for _, plugin := range plugins {
 			pluginResults = appendIfOk(pluginResults, plugin, requestConditions)
