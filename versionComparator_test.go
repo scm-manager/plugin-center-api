@@ -5,24 +5,6 @@ import (
 	"testing"
 )
 
-func TestThreePartVersionIsParsed(t *testing.T) {
-	parsedVersion := parse("1.2.3")
-
-	assert.Equal(t, version{"1", "2", "3"}, parsedVersion)
-}
-
-func TestTwoPartVersionIsParsed(t *testing.T) {
-	parsedVersion := parse("1.2")
-
-	assert.Equal(t, version{"1", "2"}, parsedVersion)
-}
-
-func TestOnePartVersionIsParsed(t *testing.T) {
-	parsedVersion := parse("1")
-
-	assert.Equal(t, version{"1"}, parsedVersion)
-}
-
 func TestVersionComparisonWithMajorVersion(t *testing.T) {
 	assert.True(t, isLess("1.2", "2.1"))
 	assert.False(t, isLess("2.1", "1.2"))
