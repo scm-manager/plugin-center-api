@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"log"
 	"net/http"
 )
 
@@ -9,6 +13,15 @@ type UrlGenerator struct {
 	host     string
 	protocol string
 }
+
+var (
+	downloadCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "scm_plugin_center_download_requests",
+		Help: "Total number of downloads",
+	}, []string{
+		"plugin", "version",
+	})
+)
 
 func NewUrlGenerator(r http.Request) UrlGenerator {
 	forwardedHost := r.Header.Get("X-Forwarded-Host")
@@ -21,7 +34,7 @@ func NewUrlGenerator(r http.Request) UrlGenerator {
 	} else {
 		return UrlGenerator{
 			host:     r.Host,
-			protocol: r.Proto,
+			protocol: "https",
 		}
 	}
 }
@@ -32,6 +45,36 @@ func (u *UrlGenerator) DownloadUrl(plugin Plugin, version string) string {
 
 func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		pluginName := vars["plugin"]
+		pluginVersion := vars["version"]
 
+		release := findRelease(plugins, pluginName, pluginVersion)
+
+		if release == nil {
+			log.Println("no plugin found for name", pluginName, "and version", pluginVersion)
+			w.WriteHeader(404)
+			return
+		}
+
+		downloadCounter.WithLabelValues(
+			pluginName,
+			pluginVersion,
+		).Inc()
+
+		http.Redirect(w, r, release.Url, http.StatusSeeOther)
 	}
+}
+
+func findRelease(plugins []Plugin, name string, version string) *Release {
+	for _, plugin := range plugins {
+		if plugin.Name == name {
+			for _, release := range plugin.Releases {
+				if release.Version == version {
+					return &release
+				}
+			}
+		}
+	}
+	return nil
 }

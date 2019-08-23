@@ -70,8 +70,10 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			requestConditions.Os,
 		).Inc()
 
+		urlGenerator := NewUrlGenerator(*r)
+
 		for _, plugin := range plugins {
-			pluginResults = appendIfOk(pluginResults, plugin, requestConditions)
+			pluginResults = appendIfOk(pluginResults, plugin, requestConditions, urlGenerator)
 		}
 
 		embedded := make(map[string]PluginResults)
@@ -111,9 +113,10 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 	return requestConditions, nil
 }
 
-func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions) []PluginResult {
+func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions, generator UrlGenerator) []PluginResult {
 	for _, release := range plugin.Releases {
 		if conditionsMatch(conditions, release.Conditions) {
+			url := generator.DownloadUrl(plugin, release.Version)
 			result := PluginResult{
 				Name:        plugin.Name,
 				DisplayName: plugin.DisplayName,
@@ -122,7 +125,9 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Version:     release.Version,
 				Author:      plugin.Author,
 				Conditions:  extractConditions(release.Conditions),
-				Links:       nil,
+				Links: Links{
+					"download": Link{Href: url},
+				},
 			}
 			return append(results, result)
 		}

@@ -34,3 +34,10 @@ func TestUrlGeneratorWithoutForwardedHeader(t *testing.T) {
 		"https://scm.org/api/v1/download/scm-download-plguin/1.2.3",
 		generator.DownloadUrl(Plugin{Name: "scm-download-plguin"}, "1.2.3"))
 }
+
+func TestDownloadHandler(t *testing.T) {
+	rr := initRouter("/api/v1/download/ssh-plugin/2.0", t)
+
+	assert.Equal(t, http.StatusSeeOther, rr.Code)
+	assert.Equal(t, "http://example.com", rr.Header().Get("Location"))
+}

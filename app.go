@@ -22,6 +22,7 @@ func main() {
 	r.HandleFunc("/live", NewOkHandler())
 	r.HandleFunc("/ready", NewOkHandler())
 	r.Handle("/api/v1/plugins/{version}", NewPluginHandler(plugins))
+	r.Handle("/api/v1/download/{plugin}/{version}", NewDownloadHandler(plugins))
 
 	port := os.Getenv("PORT")
 	if port == "" {
