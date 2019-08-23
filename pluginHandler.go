@@ -112,6 +112,12 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 }
 
 func conditionsMatch(requestConditions RequestConditions, releaseConditions Conditions) bool {
+	if releaseConditions.Os != "" && releaseConditions.Os != requestConditions.Os {
+		return false
+	}
+	if releaseConditions.MinVersion == "" {
+		return true
+	}
 	minVersion, err := version.NewVersion(releaseConditions.MinVersion)
 	if err != nil {
 		log.Println("could not parse version string", releaseConditions.MinVersion, "- ignoring release")

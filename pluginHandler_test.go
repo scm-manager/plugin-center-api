@@ -8,7 +8,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.1", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Linux", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
-	req, err := http.NewRequest("GET", "/?version=2.0.0", nil)
+	req, err := http.NewRequest("GET", "/?version=2.0.0&os=Linux", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,6 +70,21 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 
 	assert.Contains(t, rr.Body.String(), `"version":"1.1"`)
 	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.0"`)
+}
+
+func TestPluginHandlerFiltersForOs(t *testing.T) {
+	req, err := http.NewRequest("GET", "/?version=2.0.1&os=Windows", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewPluginHandler(testData)
+	handler.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.NotContains(t, rr.Body.String(), `"ssh-plugin"`)
+	assert.Contains(t, rr.Body.String(), `"ad-plugin"`)
 }
 
 var testData = []Plugin{
