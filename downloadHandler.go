@@ -7,6 +7,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 )
 
 type UrlGenerator struct {
@@ -78,7 +80,27 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 		pluginVersion,
 	).Inc()
 
-	http.Redirect(w, r, release.Url, http.StatusSeeOther)
+  releaseUrl, err := url.ParseRequestURI(release.Url)
+
+  if err != nil {
+    log.Println("could not parse url for release:", err)
+    w.WriteHeader(500)
+    w.Write([]byte("illegal url for plugin found"))
+    return
+  }
+
+  director := func(req *http.Request) {
+    req.URL.Scheme = releaseUrl.Scheme
+    req.URL.Host = releaseUrl.Host
+    req.URL.Path = releaseUrl.Path
+    req.URL.RawQuery = releaseUrl.RawQuery
+    req.Host = releaseUrl.Host
+
+    log.Println("redirecting download from", r.URL.String(), "to", req.URL.String())
+  }
+
+  proxy := httputil.ReverseProxy{Director: director}
+  proxy.ServeHTTP(w, r)
 }
 
 func (h *DownloadHandler) findRelease(name string, version string) *Release {
