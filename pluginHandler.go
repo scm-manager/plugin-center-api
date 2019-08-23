@@ -80,14 +80,14 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 		return RequestConditions{}, err
 	}
 	queryParameters := r.Form
-	version, err := version.NewVersion(queryParameters.Get("version"))
+	requestVersion, err := version.NewVersion(queryParameters.Get("version"))
 	if err != nil {
 		return RequestConditions{}, err
 	}
 	requestConditions := RequestConditions{
 		Os:      queryParameters.Get("os"),
 		Arch:    queryParameters.Get("arch"),
-		Version: *version,
+		Version: *requestVersion,
 	}
 	return requestConditions, nil
 }
