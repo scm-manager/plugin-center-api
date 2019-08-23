@@ -17,7 +17,7 @@ func isLess(versionString1 string, versionString2 string) bool {
 	v1, err1 := version.NewVersion(versionString1)
 	v2, err2 := version.NewVersion(versionString2)
 	if err1 != nil || err2 != nil {
-		log.Println("cannot compare versions by smeantic versioning: ", versionString1, ",", versionString2, "- Falling back to string compare")
+		log.Println("cannot compare versions by semantic versioning: ", versionString1, ",", versionString2, "- Falling back to string compare")
 		return versionString1 < versionString2
 	}
 	return v1.LessThan(v2)
