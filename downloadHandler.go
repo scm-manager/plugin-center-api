@@ -35,7 +35,7 @@ func (u *UrlGenerator) DownloadUrl(plugin Plugin, version string) string {
 }
 
 type DownloadHandler struct {
-	plugins []Plugin
+	plugins map[string]Plugin
 }
 
 var (
@@ -48,8 +48,16 @@ var (
 )
 
 func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
-	handler := DownloadHandler{plugins: plugins}
+	handler := DownloadHandler{plugins: createMap(plugins)}
 	return handler.handle
+}
+
+func createMap(plugins []Plugin) map[string]Plugin {
+	m := make(map[string]Plugin)
+	for _, plugin := range plugins {
+		m[plugin.Name] = plugin
+	}
+	return m
 }
 
 func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
@@ -74,13 +82,10 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *DownloadHandler) findRelease(name string, version string) *Release {
-	for _, plugin := range h.plugins {
-		if plugin.Name == name {
-			for _, release := range plugin.Releases {
-				if release.Version == version {
-					return &release
-				}
-			}
+	plugin := h.plugins[name]
+	for _, release := range plugin.Releases {
+		if release.Version == version {
+			return &release
 		}
 	}
 	return nil
