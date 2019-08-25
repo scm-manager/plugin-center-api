@@ -37,7 +37,7 @@ func (u *UrlGenerator) DownloadUrl(plugin Plugin, version string) string {
 }
 
 type DownloadHandler struct {
-	plugins map[string]Plugin
+	plugins map[string]map[string]Release
 }
 
 var (
@@ -54,12 +54,16 @@ func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
 	return handler.handle
 }
 
-func createMap(plugins []Plugin) map[string]Plugin {
-	m := make(map[string]Plugin)
+func createMap(plugins []Plugin) map[string]map[string]Release {
+	pluginMap := make(map[string]map[string]Release)
 	for _, plugin := range plugins {
-		m[plugin.Name] = plugin
+		releaseMap := make(map[string]Release)
+		for _, release := range plugin.Releases {
+			releaseMap[release.Version] = release
+		}
+		pluginMap[plugin.Name] = releaseMap
 	}
-	return m
+	return pluginMap
 }
 
 func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
@@ -69,46 +73,42 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 
 	release := h.findRelease(pluginName, pluginVersion)
 
-	if release == nil {
-		log.Println("no plugin found for name", pluginName, "and version", pluginVersion)
+	if release.Version == "" {
+		log.Println("no release found for plugin", pluginName, "and version", pluginVersion)
 		w.WriteHeader(404)
 		return
 	}
+	log.Println("found release found for plugin", pluginName, "and version", pluginVersion, ":", release.Url)
 
 	downloadCounter.WithLabelValues(
 		pluginName,
 		pluginVersion,
 	).Inc()
 
-  releaseUrl, err := url.ParseRequestURI(release.Url)
+	releaseUrl, err := url.ParseRequestURI(release.Url)
 
-  if err != nil {
-    log.Println("could not parse url for release:", err)
-    w.WriteHeader(500)
-    w.Write([]byte("illegal url for plugin found"))
-    return
-  }
+	if err != nil {
+		log.Println("could not parse url for release:", err)
+		w.WriteHeader(500)
+		w.Write([]byte("illegal url for plugin found"))
+		return
+	}
 
-  director := func(req *http.Request) {
-    req.URL.Scheme = releaseUrl.Scheme
-    req.URL.Host = releaseUrl.Host
-    req.URL.Path = releaseUrl.Path
-    req.URL.RawQuery = releaseUrl.RawQuery
-    req.Host = releaseUrl.Host
+	director := func(req *http.Request) {
+		req.URL.Scheme = releaseUrl.Scheme
+		req.URL.Host = releaseUrl.Host
+		req.URL.Path = releaseUrl.Path
+		req.URL.RawQuery = releaseUrl.RawQuery
+		req.Host = releaseUrl.Host
 
-    log.Println("redirecting download from", r.URL.String(), "to", req.URL.String())
-  }
+		log.Println("redirecting download from", r.URL.String(), "to", req.URL.String())
+	}
 
-  proxy := httputil.ReverseProxy{Director: director}
-  proxy.ServeHTTP(w, r)
+	proxy := httputil.ReverseProxy{Director: director}
+	proxy.ServeHTTP(w, r)
 }
 
-func (h *DownloadHandler) findRelease(name string, version string) *Release {
-	plugin := h.plugins[name]
-	for _, release := range plugin.Releases {
-		if release.Version == version {
-			return &release
-		}
-	}
-	return nil
+func (h *DownloadHandler) findRelease(name string, version string) Release {
+	releases := h.plugins[name]
+	return releases[version]
 }
