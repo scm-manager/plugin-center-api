@@ -37,7 +37,7 @@ func (u *UrlGenerator) DownloadUrl(plugin Plugin, version string) string {
 }
 
 type DownloadHandler struct {
-	plugins map[string]map[string]Release
+	plugins map[string]map[string]*Release
 }
 
 var (
@@ -54,12 +54,12 @@ func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
 	return handler.handle
 }
 
-func createMap(plugins []Plugin) map[string]map[string]Release {
-	pluginMap := make(map[string]map[string]Release)
+func createMap(plugins []Plugin) map[string]map[string]*Release {
+	pluginMap := make(map[string]map[string]*Release)
 	for _, plugin := range plugins {
-		releaseMap := make(map[string]Release)
+		releaseMap := make(map[string]*Release)
 		for _, release := range plugin.Releases {
-			releaseMap[release.Version] = release
+			releaseMap[release.Version] = &release
 		}
 		pluginMap[plugin.Name] = releaseMap
 	}
@@ -73,12 +73,12 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 
 	release := h.findRelease(pluginName, pluginVersion)
 
-	if release.Version == "" {
+	if release == nil {
 		log.Println("no release found for plugin", pluginName, "and version", pluginVersion)
 		w.WriteHeader(404)
 		return
 	}
-	log.Println("found release found for plugin", pluginName, "and version", pluginVersion, ":", release.Url)
+	log.Println("found release for plugin", pluginName, "and version", pluginVersion, ":", release.Url)
 
 	downloadCounter.WithLabelValues(
 		pluginName,
@@ -108,7 +108,7 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
-func (h *DownloadHandler) findRelease(name string, version string) Release {
+func (h *DownloadHandler) findRelease(name string, version string) *Release {
 	releases := h.plugins[name]
 	return releases[version]
 }
