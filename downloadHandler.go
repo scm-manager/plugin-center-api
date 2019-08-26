@@ -73,6 +73,8 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("found release for plugin", pluginName, "and version", pluginVersion, ":", release.Url)
+
 	downloadCounter.WithLabelValues(
 		pluginName,
 		pluginVersion,
