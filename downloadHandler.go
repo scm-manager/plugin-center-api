@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"io"
 	"log"
 	"net/http"
 )
@@ -25,7 +26,7 @@ func NewUrlGenerator(r http.Request) UrlGenerator {
 	} else {
 		return UrlGenerator{
 			host:     r.Host,
-			protocol: "https",
+			protocol: "http", // TODO
 		}
 	}
 }
@@ -35,7 +36,8 @@ func (u *UrlGenerator) DownloadUrl(plugin Plugin, version string) string {
 }
 
 type DownloadHandler struct {
-	plugins map[string]Plugin
+	plugins        map[string]Plugin
+	downloadPlugin func(url string) (resp *http.Response, err error)
 }
 
 var (
@@ -48,7 +50,7 @@ var (
 )
 
 func NewDownloadHandler(plugins []Plugin) http.HandlerFunc {
-	handler := DownloadHandler{plugins: createMap(plugins)}
+	handler := DownloadHandler{plugins: createMap(plugins), downloadPlugin: http.Get}
 	return handler.handle
 }
 
@@ -80,7 +82,23 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 		pluginVersion,
 	).Inc()
 
-	http.Redirect(w, r, release.Url, http.StatusSeeOther)
+	h.copyHttpStream(release, pluginName, pluginVersion, w)
+}
+
+func (h *DownloadHandler) copyHttpStream(release *Release, pluginName string, pluginVersion string, w http.ResponseWriter) {
+	resp, err := h.downloadPlugin(release.Url)
+	if err != nil {
+		log.Println("error opening url for plugin", pluginName, "and version", pluginVersion, ":", release.Url, err)
+		w.WriteHeader(503)
+		w.Write([]byte("could not read plugin from target"))
+		return
+	}
+	defer resp.Body.Close()
+	w.Header().Add("Content-Disposition", `attachment; filename="`+pluginName+`.smp"`)
+	written, err := io.Copy(w, resp.Body)
+	if err != nil {
+		log.Println("got an error copying download stream for url", release.Url, "after", written, "bytes:", err)
+	}
 }
 
 func (h *DownloadHandler) findRelease(name string, version string) *Release {

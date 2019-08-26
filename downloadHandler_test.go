@@ -2,7 +2,9 @@ package main
 
 import (
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -15,8 +17,8 @@ func TestUrlGeneratorWithForwardedHeader(t *testing.T) {
 	})
 
 	assert.Equal(t,
-		"https://froward.for/api/v1/download/scm-download-plguin/1.2.3",
-		generator.DownloadUrl(Plugin{Name: "scm-download-plguin"}, "1.2.3"))
+		"https://froward.for/api/v1/download/scm-download-plugin/1.2.3",
+		generator.DownloadUrl(Plugin{Name: "scm-download-plugin"}, "1.2.3"))
 }
 
 func TestUrlGeneratorWithoutForwardedHeader(t *testing.T) {
@@ -27,17 +29,25 @@ func TestUrlGeneratorWithoutForwardedHeader(t *testing.T) {
 		ProtoMinor: 0,
 		Header:     http.Header{},
 		Host:       "scm.org",
-		RequestURI: "https://scm.org/api/v1/plugins/2.0.0",
+		RequestURI: "http://scm.org/api/v1/plugins/2.0.0",
 	})
 
 	assert.Equal(t,
-		"https://scm.org/api/v1/download/scm-download-plguin/1.2.3",
-		generator.DownloadUrl(Plugin{Name: "scm-download-plguin"}, "1.2.3"))
+		"http://scm.org/api/v1/download/scm-download-plugin/1.2.3",
+		generator.DownloadUrl(Plugin{Name: "scm-download-plugin"}, "1.2.3"))
 }
 
 func TestDownloadHandler(t *testing.T) {
-	rr := initRouter("/api/v1/download/ssh-plugin/2.0", t)
 
-	assert.Equal(t, http.StatusSeeOther, rr.Code)
-	assert.Equal(t, "http://example.com", rr.Header().Get("Location"))
+	getMock := func(url string) (resp *http.Response, err error) {
+		assert.Equal(t, "http://example.com", url)
+		return &http.Response{Body: ioutil.NopCloser(strings.NewReader("content"))}, nil
+	}
+
+	downloadHandler := DownloadHandler{plugins: createMap(testData), downloadPlugin: getMock}
+
+	rr := initRouter("/api/v1/download/ssh-plugin/2.0", t, downloadHandler.handle)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "content", rr.Body.String())
 }

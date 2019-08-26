@@ -7,7 +7,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -15,7 +15,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -28,18 +28,18 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
 	assert.Contains(t, rr.Body.String(), `"conditions":{`)
-	assert.Contains(t, rr.Body.String(), `"os":"linux"`)
+	assert.Contains(t, rr.Body.String(), `"os":["linux"]`)
 	assert.Contains(t, rr.Body.String(), `"arch":"64"`)
 	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.1"`)
 }
 
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.0?os=linux&arch=64", t)
+	rr := initRouter("/api/v1/plugins/2.0.0?os=linux&arch=64", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -48,7 +48,7 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=windows&arch=64", t)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=windows&arch=64", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -57,7 +57,7 @@ func TestPluginHandlerFiltersForOs(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForArch(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=32", t)
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=32", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -65,7 +65,7 @@ func TestPluginHandlerFiltersForArch(t *testing.T) {
 }
 
 func TestPluginHandlerTreatsOsAndArchAsOptional(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1", t)
+	rr := initRouter("/api/v1/plugins/2.0.1", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -74,7 +74,7 @@ func TestPluginHandlerTreatsOsAndArchAsOptional(t *testing.T) {
 }
 
 func TestPluginHandlerRewritesDownloadUrl(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1", t)
+	rr := initRouter("/api/v1/plugins/2.0.1", t, NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func initRouter(url string, t *testing.T) *httptest.ResponseRecorder {
+func initRouter(url string, t *testing.T, handler func(http.ResponseWriter, *http.Request)) *httptest.ResponseRecorder {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -16,8 +16,8 @@ func initRouter(url string, t *testing.T) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/plugins/{version}", NewPluginHandler(testData))
-	router.HandleFunc("/api/v1/download/{plugin}/{version}", NewDownloadHandler(testData))
+	router.HandleFunc("/api/v1/plugins/{version}", handler)
+	router.HandleFunc("/api/v1/download/{plugin}/{version}", handler)
 	router.ServeHTTP(rr, req)
 
 	return rr
