@@ -12,7 +12,7 @@ import (
 
 type Links map[string]Link
 
-type ConditionMap map[string]string
+type ConditionMap map[string]interface{}
 
 type Link struct {
 	Href string `json:"href"`
@@ -63,6 +63,8 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			w.Write([]byte("could not parse form data for request"))
 			return
 		}
+
+		log.Println("reading plugins for version", requestConditions.Version.Original())
 
 		requestCounter.WithLabelValues(
 			requestConditions.Version.String(),
@@ -154,9 +156,9 @@ func conditionsMatch(requestConditions RequestConditions, releaseConditions Cond
 }
 
 func extractConditions(conditions Conditions) ConditionMap {
-	conditionMap := make(map[string]string)
+	conditionMap := make(map[string]interface{})
 	if conditions.Os != "" {
-		conditionMap["os"] = conditions.Os
+		conditionMap["os"] = []string{conditions.Os}
 	}
 	if conditions.Arch != "" {
 		conditionMap["arch"] = conditions.Arch
