@@ -33,7 +33,7 @@ var testData = []Plugin{
 			{
 				Version: "2.0",
 				Conditions: Conditions{
-					Os:         "linux",
+					Os:         []string{"linux"},
 					Arch:       "64",
 					MinVersion: "2.0.1",
 				},
@@ -44,7 +44,7 @@ var testData = []Plugin{
 			{
 				Version: "1.1",
 				Conditions: Conditions{
-					Os:         "linux",
+					Os:         []string{"linux"},
 					Arch:       "64",
 					MinVersion: "2.0.0",
 				},
@@ -55,7 +55,7 @@ var testData = []Plugin{
 			{
 				Version: "0.1",
 				Conditions: Conditions{
-					Os: "linux",
+					Os: []string{"linux"},
 				},
 				Url:      "http://example.com",
 				Date:     "1.01.2019",
@@ -73,7 +73,7 @@ var testData = []Plugin{
 			{
 				Version: "1.0",
 				Conditions: Conditions{
-					Os: "windows",
+					Os: []string{"windows", "linux"},
 				},
 				Url:      "http://example.com",
 				Date:     "1.01.2019",

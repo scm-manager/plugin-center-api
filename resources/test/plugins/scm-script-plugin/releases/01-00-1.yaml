@@ -4,5 +4,6 @@ date: 2009-01-01T12:00:00+01:00
 url: https://download.scm-manager.org/plugins/1.0.0/scm-script-plugin.smp
 checksum: f464372baf1ce0d7d0f67e5283f7c4210e24dcf330f955a3261317a77330c19f
 conditions:
-  os: linux 
+  os:
+  - Linux
   arch: amd64

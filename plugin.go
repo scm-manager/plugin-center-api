@@ -1,9 +1,9 @@
 package main
 
 type Conditions struct {
-	Os         string `yaml:"os"`
-	Arch       string `yaml:"arch"`
-	MinVersion string `yaml:"minVersion"`
+	Os         []string `yaml:"os"`
+	Arch       string   `yaml:"arch"`
+	MinVersion string   `yaml:"minVersion"`
 }
 
 type Release struct {

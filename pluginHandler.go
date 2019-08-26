@@ -138,8 +138,16 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 }
 
 func conditionsMatch(requestConditions RequestConditions, releaseConditions Conditions) bool {
-	if releaseConditions.Os != "" && requestConditions.Os != "" && releaseConditions.Os != requestConditions.Os {
-		return false
+	if len(releaseConditions.Os) > 0 && requestConditions.Os != "" {
+		var contains = false
+		for _, os := range releaseConditions.Os {
+			if requestConditions.Os == os {
+				contains = true
+			}
+		}
+		if !contains {
+			return false
+		}
 	}
 	if releaseConditions.Arch != "" && requestConditions.Arch != "" && releaseConditions.Arch != requestConditions.Arch {
 		return false
@@ -157,8 +165,8 @@ func conditionsMatch(requestConditions RequestConditions, releaseConditions Cond
 
 func extractConditions(conditions Conditions) ConditionMap {
 	conditionMap := make(map[string]interface{})
-	if conditions.Os != "" {
-		conditionMap["os"] = []string{conditions.Os}
+	if len(conditions.Os) > 0 {
+		conditionMap["os"] = conditions.Os
 	}
 	if conditions.Arch != "" {
 		conditionMap["arch"] = conditions.Arch
