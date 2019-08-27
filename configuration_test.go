@@ -15,6 +15,8 @@ func TestReadConfigurationFromConfigYaml(t *testing.T) {
 func TestReadConfigurationFromEnv(t *testing.T) {
 	err := os.Setenv("CONFIG_DESCRIPTOR_DIRECTORY", "/plugins")
 	assert.NoError(t, err)
+	defer os.Unsetenv("CONFIG_DESCRIPTOR_DIRECTORY")
+
 	config := readConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
 }
@@ -30,6 +32,7 @@ func TestReadConfigurationFromNonDefaultPath(t *testing.T) {
 
 	err = os.Setenv("CONFIG", tmpFile.Name())
 	assert.NoError(t, err)
+	defer os.Unsetenv("CONFIG")
 
 	config := readConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
@@ -45,6 +48,8 @@ func TestReadConfigurationWithoutConfigYaml(t *testing.T) {
 
 	err = os.Setenv("CONFIG_DESCRIPTOR_DIRECTORY", "/plugins")
 	assert.NoError(t, err)
+	defer os.Unsetenv("CONFIG_DESCRIPTOR_DIRECTORY")
+
 	config := readConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
 }
@@ -52,6 +57,8 @@ func TestReadConfigurationWithoutConfigYaml(t *testing.T) {
 func TestReadConfigurationFromConfigYamlAndEnvironment(t *testing.T) {
 	err := os.Setenv("CONFIG_PORT", "8082")
 	assert.NoError(t, err)
+	defer os.Unsetenv("CONFIG_PORT")
+
 	config := readConfiguration()
 	assert.Equal(t, "resources/test/plugins", config.DescriptorDirectory)
 	assert.Equal(t, 8082, config.Port)
