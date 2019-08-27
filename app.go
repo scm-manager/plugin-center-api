@@ -5,7 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
-	"os"
+	"strconv"
 )
 
 func main() {
@@ -24,14 +24,9 @@ func main() {
 	r.HandleFunc("/live", NewOkHandler())
 	r.HandleFunc("/ready", NewOkHandler())
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8000"
-	}
+	log.Println("start plugin center api on port", configuration.Port)
 
-	log.Println("start plugin center api on port", port)
-
-	err = http.ListenAndServe(":"+port, r)
+	err = http.ListenAndServe(":"+strconv.Itoa(configuration.Port), r)
 	if err != nil {
 		log.Fatal("http server returned err: ", err)
 	}
