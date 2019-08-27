@@ -70,8 +70,9 @@ func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 	release := h.findRelease(pluginName, pluginVersion)
 
 	if release == nil {
-		log.Println("no plugin found for name", pluginName, "and version", pluginVersion)
-		w.WriteHeader(404)
+		msg := fmt.Sprintf("no plugin found for name %s and version %s", pluginName, pluginVersion)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusNotFound)
 		return
 	}
 
@@ -89,8 +90,7 @@ func (h *DownloadHandler) copyHttpStream(release *Release, pluginName string, pl
 	resp, err := h.downloadPlugin(release.Url)
 	if err != nil {
 		log.Println("error opening url for plugin", pluginName, "and version", pluginVersion, ":", release.Url, err)
-		w.WriteHeader(503)
-		w.Write([]byte("could not read plugin from target"))
+		http.Error(w, "could not read plugin from target", http.StatusServiceUnavailable)
 		return
 	}
 	defer resp.Body.Close()

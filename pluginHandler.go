@@ -59,8 +59,7 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 		requestConditions, err := extractRequestConditions(r)
 		if err != nil {
 			log.Println("could not parse form data for request", err)
-			w.WriteHeader(400)
-			w.Write([]byte("could not parse form data for request"))
+			http.Error(w, "could not parse form data for request", http.StatusBadRequest)
 			return
 		}
 
@@ -87,7 +86,7 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 		data, err := json.Marshal(response)
 		if err != nil {
 			log.Println("could not marshal result for plugin call", err)
-			http.Error(w, "failed to marshal response", 500)
+			http.Error(w, "failed to marshal response", http.StatusInternalServerError)
 		}
 		_, err = w.Write(data)
 		if err != nil {
