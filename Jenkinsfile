@@ -37,6 +37,7 @@ pipeline {
       steps {
         sh 'mkdir -p target/unit-tests'
         sh 'go test -v -coverprofile target/unit-tests/coverage.out > target/unit-tests/tests.out'
+        sh 'go test -v -coverprofile target/unit-tests/coverage.out -json > target/unit-tests/tests.json'
       }
     }
 
