@@ -47,8 +47,8 @@ func TestIfReleasesAreRead(t *testing.T) {
 	assert.Equal(t, "2009-01-01T12:00:00+01:00", release.Date, "wrong date for release")
 	assert.Equal(t, "https://download.scm-manager.org/plugins/1.0.0/scm-cas-plugin.smp", release.Url, "wrong url for release")
 	assert.Equal(t, "f464372baf1ce0d7d0f67e5283f7c4210e24dcf330f955a3261317a77330c19f", release.Checksum, "wrong checksum for release")
-	assert.Equal(t, "linux", release.Conditions.Os, "wrong os for release conditions")
-	assert.Equal(t, "amd64", release.Conditions.Arch, "wrong arch for release conditions")
+	assert.Equal(t, []string{"Linux"}, release.Conditions.Os, "wrong os for release conditions")
+	assert.Equal(t, "64", release.Conditions.Arch, "wrong arch for release conditions")
 }
 
 func TestReleasesAreSorted(t *testing.T) {
