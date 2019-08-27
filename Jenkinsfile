@@ -1,4 +1,6 @@
 #!/usr/bin/env groovy
+def version = 'UNKNOWN'
+
 pipeline {
 
  options {
@@ -12,6 +14,15 @@ pipeline {
   }
 
   stages {
+
+    stage('Environment') {
+      steps {
+        script {
+          def commitHashShort = sh(returnStdout: true, script: 'git rev-parse --short HEAD')
+          version = "${new Date().format('yyyyMMddHHmm')}-${commitHashShort}".trim()
+        }
+      }
+    }
 
     stage('Build') {
       agent {
@@ -81,7 +92,7 @@ pipeline {
       }
     }
 
-    /*stage('Docker') {
+    stage('Docker') {
       agent {
         node {
           label 'docker'
@@ -89,15 +100,13 @@ pipeline {
       }
       steps {
         script {
-          def commitHashShort = sh.returnStdOut "git log -1 --pretty=%B"
-          def version = "${new Date().format('yyyyMMddHHmm')}-${commitHashShort}"
-          image = docker.build("scmmanager/plugin-center-api:${version}")
           docker.withRegistry('', 'hub.docker.com-cesmarvin') {
+            def image = docker.build("scmmanager/plugin-center-api:${version}")
             image.push()
           }
         }
       }
-    }*/
+    }
 
   }
 }
