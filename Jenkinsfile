@@ -37,6 +37,7 @@ pipeline {
       }
       steps {
         sh 'go build -a -tags netgo -ldflags "-w -extldflags \'-static\'" -o target/plugin-center-api *.go'
+        stash name: 'target', includes: 'target/*'
       }
     }
 
@@ -100,6 +101,7 @@ pipeline {
         }
       }
       steps {
+        unstash 'target'
         script {
           dir("plugin-center") {
             git changelog: false, poll: false, url: 'https://bitbucket.org/scm-manager/plugin-center'
