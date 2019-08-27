@@ -100,6 +100,9 @@ pipeline {
       }
       steps {
         script {
+          dir("plugin-center") {
+            git changelog: false, poll: false, url: 'https://bitbucket.org/scm-manager/plugin-center'
+          }
           docker.withRegistry('', 'hub.docker.com-cesmarvin') {
             def image = docker.build("scmmanager/plugin-center-api:${version}")
             image.push()
