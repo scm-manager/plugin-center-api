@@ -78,6 +78,11 @@ pipeline {
     }
 
     stage('Docker') {
+      agent {
+        node {
+          label 'docker'
+        }
+      }
       steps {
         script {
           def commitHashShort = sh.returnStdOut "git log -1 --pretty=%B"
