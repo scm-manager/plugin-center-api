@@ -111,5 +111,22 @@ pipeline {
       }
     }
 
+    stage('Deployment') {
+      when {
+        branch 'master'
+      }
+      agent {
+        docker {
+          image 'lachlanevenson/k8s-helm:v2.14.2'
+          args  '--entrypoint=""'
+        }
+      }
+      steps {
+        withCredentials([file(credentialsId: 'kubeconfig-oss-helm', variable: 'KUBECONFIG')]) {
+          sh "helm upgrade --install --set image.tag=${version} plugin-center-api helm/plugin-center-api"
+        }
+      }
+    }
+
   }
 }
