@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -38,7 +39,6 @@ func TestUrlGeneratorWithoutForwardedHeader(t *testing.T) {
 }
 
 func TestDownloadHandler(t *testing.T) {
-
 	getMock := func(url string) (resp *http.Response, err error) {
 		assert.Equal(t, "http://example.com", url)
 		return &http.Response{Body: ioutil.NopCloser(strings.NewReader("content"))}, nil
@@ -50,4 +50,23 @@ func TestDownloadHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Equal(t, "content", rr.Body.String())
+}
+
+func TestDownloadHandlerReleaseNotFound(t *testing.T) {
+	var plugins []Plugin
+	downloadHandler := DownloadHandler{plugins: createMap(plugins), downloadPlugin: nil}
+
+	rr := initRouter("/api/v1/download/ssh-plugin/2.0", t, downloadHandler.handle)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestDownloadHandlerRemoteFailes(t *testing.T) {
+	getMock := func(url string) (resp *http.Response, err error) {
+		return nil, fmt.Errorf("failed to handle request: %s", url)
+	}
+
+	downloadHandler := DownloadHandler{plugins: createMap(testData), downloadPlugin: getMock}
+	rr := initRouter("/api/v1/download/ssh-plugin/2.0", t, downloadHandler.handle)
+
+	assert.Equal(t, http.StatusServiceUnavailable, rr.Code)
 }
