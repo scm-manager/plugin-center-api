@@ -59,6 +59,11 @@ pipeline {
     }
 
     stage('Sonarqube') {
+      agent {
+        node {
+          label 'docker'
+        }
+      }
       environment {
         scannerHome = tool 'sonar-scanner'
       }
