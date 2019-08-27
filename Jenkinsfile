@@ -81,7 +81,7 @@ pipeline {
       }
     }
 
-    stage('Docker') {
+    /*stage('Docker') {
       agent {
         node {
           label 'docker'
@@ -97,7 +97,7 @@ pipeline {
           }
         }
       }
-    }
+    }*/
 
   }
 }
