@@ -25,6 +25,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"category":"test"`)
 	assert.Contains(t, rr.Body.String(), `"version":"2.0"`)
 	assert.Contains(t, rr.Body.String(), `"author":"Cloudogu"`)
+	assert.Contains(t, rr.Body.String(), `"sha256sum":"abc"`)
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {

@@ -25,6 +25,7 @@ type PluginResult struct {
 	Category    string       `json:"category"`
 	Version     string       `json:"version"`
 	Author      string       `json:"author"`
+	Checksum    string       `json:"sha256sum"`
 	Conditions  ConditionMap `json:"conditions"`
 	Links       Links        `json:"_links"`
 }
@@ -125,6 +126,7 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Category:    plugin.Category,
 				Version:     release.Version,
 				Author:      plugin.Author,
+				Checksum:    release.Checksum,
 				Conditions:  extractConditions(release.Conditions),
 				Links: Links{
 					"download": Link{Href: url},
