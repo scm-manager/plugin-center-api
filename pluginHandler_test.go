@@ -39,6 +39,22 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.1"`)
 }
 
+func TestPluginHandlerReturnsDependenciesFromRelease(t *testing.T) {
+	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), `"dependencies":["scm-mail-plugin"]`)
+}
+
+func TestPluginHandlerReturnsEmptyDependenciesWhenNotSetInRelease(t *testing.T) {
+	rr := initRouter("/api/v1/plugins/1.0.0?os=windows", t, NewPluginHandler(testData))
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), `"dependencies":[]`)
+}
+
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 	rr := initRouter("/api/v1/plugins/2.0.0?os=linux&arch=64", t, NewPluginHandler(testData))
 

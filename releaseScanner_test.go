@@ -63,6 +63,16 @@ func TestReleasesAreSorted(t *testing.T) {
 	assert.Equal(t, "1.0.0", plugin.Releases[2].Version, "wrong version for release")
 }
 
+func TestIfDependenciesAreRead(t *testing.T) {
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
+
+	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugin := findPluginByName(plugins, "scm-cas-plugin")
+
+	release := plugin.Releases[1]
+	assert.Equal(t, []string{"scm-mail-plugin"}, release.Dependencies, "wrong dependencies for plugin")
+}
+
 func findPluginByName(plugins []Plugin, name string) *Plugin {
 	for _, plugin := range plugins {
 		if name == plugin.Name {
