@@ -37,9 +37,10 @@ var testData = []Plugin{
 					Arch:       "64",
 					MinVersion: "2.0.1",
 				},
-				Url:      "http://example.com",
-				Date:     "1.01.2019",
-				Checksum: "abc",
+				Dependencies: []string{"scm-mail-plugin"},
+				Url:          "http://example.com",
+				Date:         "1.01.2019",
+				Checksum:     "abc",
 			},
 			{
 				Version: "1.1",

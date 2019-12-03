@@ -7,11 +7,12 @@ type Conditions struct {
 }
 
 type Release struct {
-	Version    string     `yaml:"tag"`
-	Conditions Conditions `yaml:"conditions"`
-	Url        string     `yaml:"url"`
-	Date       string     `yaml:"date"`
-	Checksum   string     `yaml:"checksum"`
+	Version      string     `yaml:"tag"`
+	Conditions   Conditions `yaml:"conditions"`
+	Dependencies []string   `yaml:"dependencies"`
+	Url          string     `yaml:"url"`
+	Date         string     `yaml:"date"`
+	Checksum     string     `yaml:"checksum"`
 }
 
 type Plugin struct {
