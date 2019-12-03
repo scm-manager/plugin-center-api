@@ -3,10 +3,10 @@ def version = 'UNKNOWN'
 
 pipeline {
 
- options {
-   buildDiscarder(logRotator(numToKeepStr: '10'))
-   disableConcurrentBuilds()
- }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    disableConcurrentBuilds()
+  }
 
   agent {
     node {
@@ -56,6 +56,7 @@ pipeline {
         sh 'go test -v > target/unit-tests/tests.out'
         sh 'go test -coverprofile target/unit-tests/coverage.out'
         sh 'go test -json > target/unit-tests/tests.json'
+        stash name: 'testresults', includes: 'target/**'
       }
     }
 
@@ -70,6 +71,7 @@ pipeline {
         XDG_CACHE_HOME = "${WORKSPACE}/.cache"
       }
       steps {
+        unstash 'testresults'
         sh 'cat target/unit-tests/tests.out | go-junit-report > target/unit-tests/unit-tests.xml'
         junit 'target/unit-tests/unit-tests.xml'
       }
@@ -85,6 +87,7 @@ pipeline {
         scannerHome = tool 'sonar-scanner'
       }
       steps {
+        unstash 'testresults'
         withSonarQubeEnv('sonarcloud.io-scm') {
           sh "${scannerHome}/bin/sonar-scanner"
         }
