@@ -69,8 +69,8 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 
 		requestCounter.WithLabelValues(
 			requestConditions.Version.String(),
-			requestConditions.Arch,
 			requestConditions.Os,
+			requestConditions.Arch,
 		).Inc()
 
 		urlGenerator := NewUrlGenerator(*r)
