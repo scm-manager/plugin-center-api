@@ -1,4 +1,4 @@
-module bitbucket.org/scm-manager/plugin-center-api
+module github.com/scm-manager/plugin-center-api
 
 go 1.12
 
