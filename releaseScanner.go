@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -32,21 +32,18 @@ func scanDirectory(directory string) ([]Plugin, error) {
 }
 
 func readPluginDirectory(pluginDirectory string) *Plugin {
-	indexFileName := filepath.Join(pluginDirectory, "index.md")
-	log.Println("reading plugin file", indexFileName)
-	indexContent, err := ioutil.ReadFile(indexFileName)
-	if err != nil {
-		log.Println("no index.md file found in directory", pluginDirectory)
+	pluginYml := filepath.Join(pluginDirectory, "plugin.yml")
+	if _, err := os.Stat(pluginYml); os.IsNotExist(err) {
+		log.Printf("directory %s does not contain a plugin.yml", pluginDirectory)
 		return nil
 	}
-	var plugin Plugin
-	err = unmarshalFrontMatter(indexContent, &plugin)
+	plugin, err := readPluginYml(pluginYml)
 	if err == nil {
 		releases := readReleases(filepath.Join(pluginDirectory, "releases"))
 		plugin.Releases = releases
 		return &plugin
 	} else {
-		log.Fatalln("could not read  plugin directory", pluginDirectory)
+		log.Fatalln("could not read plugin directory", pluginDirectory)
 		return nil
 	}
 }
@@ -75,6 +72,23 @@ func readReleases(releaseDirectory string) []Release {
 	return releases
 }
 
+func readPluginYml(pluginYmlFileName string) (Plugin, error) {
+	log.Println("reading plugin file", pluginYmlFileName)
+
+	pluginYml, err := ioutil.ReadFile(pluginYmlFileName)
+	if err != nil {
+		log.Println("failed to read plugin.yml at", pluginYmlFileName)
+		return Plugin{}, nil
+	}
+
+	var plugin Plugin
+	err = yaml.Unmarshal(pluginYml, &plugin)
+	if err != nil {
+		return plugin, errors.Wrapf(err, "failed to unmarshal plugin.yml at %s", pluginYmlFileName)
+	}
+	return plugin, nil
+}
+
 func readRelease(releaseFileName string) (Release, error) {
 	releaseYaml, err := ioutil.ReadFile(releaseFileName)
 	if err != nil {
@@ -83,21 +97,4 @@ func readRelease(releaseFileName string) (Release, error) {
 	var release Release
 	err = yaml.Unmarshal(releaseYaml, &release)
 	return release, nil
-}
-
-func unmarshalFrontMatter(b []byte, plugin *Plugin) error {
-	var frontMatterDelimiter = []byte("---")
-
-	if !bytes.HasPrefix(b, frontMatterDelimiter) {
-		return errors.New("index.md file has no front matter part")
-	}
-
-	parts := bytes.SplitN(b, frontMatterDelimiter, 3)
-
-	err := yaml.Unmarshal(parts[1], plugin)
-	if err != nil {
-		return errors.Wrap(err, "could not parse front matter content")
-	}
-
-	return nil
 }

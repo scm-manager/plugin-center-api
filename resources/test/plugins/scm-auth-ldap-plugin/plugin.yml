@@ -1,0 +1,5 @@
+name: scm-auth-ldap-plugin
+displayName: LDAP
+description: LDAP Authentication
+category: authentication
+author: Cloudogu GmbH
