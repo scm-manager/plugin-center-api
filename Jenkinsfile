@@ -107,7 +107,7 @@ pipeline {
         unstash 'target'
         script {
           dir("website") {
-            git changelog: false, poll: false, url: 'https://github.com/scm-manager/website'
+            git changelog: false, poll: false, branch: 'master', url: 'https://github.com/scm-manager/website'
           }
           docker.withRegistry('', 'hub.docker.com-cesmarvin') {
             def image = docker.build("scmmanager/plugin-center-api:${version}")
