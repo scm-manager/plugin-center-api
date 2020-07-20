@@ -45,6 +45,7 @@ func TestPluginHandlerReturnsDependenciesFromRelease(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rr.Code)
 
 	assert.Contains(t, rr.Body.String(), `"dependencies":["scm-mail-plugin"]`)
+	assert.Contains(t, rr.Body.String(), `"optionalDependencies":["scm-review-plugin"]`)
 }
 
 func TestPluginHandlerReturnsEmptyDependenciesWhenNotSetInRelease(t *testing.T) {

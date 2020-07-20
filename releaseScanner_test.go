@@ -69,8 +69,10 @@ func TestIfDependenciesAreRead(t *testing.T) {
 	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
 	plugin := findPluginByName(plugins, "scm-cas-plugin")
 
-	release := plugin.Releases[1]
+	release := plugin.Releases[0]
 	assert.Equal(t, []string{"scm-mail-plugin"}, release.Dependencies, "wrong dependencies for plugin")
+	assert.Equal(t, []string{"scm-review-plugin"}, release.OptionalDependencies, "wrong optional dependencies for plugin")
+
 }
 
 func findPluginByName(plugins []Plugin, name string) *Plugin {

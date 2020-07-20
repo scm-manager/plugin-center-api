@@ -19,16 +19,17 @@ type Link struct {
 }
 
 type PluginResult struct {
-	Name         string       `json:"name"`
-	DisplayName  string       `json:"displayName"`
-	Description  string       `json:"description"`
-	Category     string       `json:"category"`
-	Version      string       `json:"version"`
-	Author       string       `json:"author"`
-	Checksum     string       `json:"sha256sum"`
-	Conditions   ConditionMap `json:"conditions"`
-	Dependencies []string     `json:"dependencies"`
-	Links        Links        `json:"_links"`
+	Name                 string       `json:"name"`
+	DisplayName          string       `json:"displayName"`
+	Description          string       `json:"description"`
+	Category             string       `json:"category"`
+	Version              string       `json:"version"`
+	Author               string       `json:"author"`
+	Checksum             string       `json:"sha256sum"`
+	Conditions           ConditionMap `json:"conditions"`
+	Dependencies         []string     `json:"dependencies"`
+	OptionalDependencies []string     `json:"optionalDependencies"`
+	Links                Links        `json:"_links"`
 }
 
 type PluginResults []PluginResult
@@ -121,15 +122,16 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 		if conditionsMatch(conditions, release.Conditions) {
 			url := generator.DownloadUrl(plugin, release.Version)
 			result := PluginResult{
-				Name:         plugin.Name,
-				DisplayName:  plugin.DisplayName,
-				Description:  plugin.Description,
-				Category:     plugin.Category,
-				Version:      release.Version,
-				Author:       plugin.Author,
-				Checksum:     release.Checksum,
-				Conditions:   extractConditions(release.Conditions),
-				Dependencies: nullToEmpty(release.Dependencies),
+				Name:                 plugin.Name,
+				DisplayName:          plugin.DisplayName,
+				Description:          plugin.Description,
+				Category:             plugin.Category,
+				Version:              release.Version,
+				Author:               plugin.Author,
+				Checksum:             release.Checksum,
+				Conditions:           extractConditions(release.Conditions),
+				Dependencies:         nullToEmpty(release.Dependencies),
+				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
 				Links: Links{
 					"download": Link{Href: url},
 				},

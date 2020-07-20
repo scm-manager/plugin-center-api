@@ -5,6 +5,8 @@ url: https://download.scm-manager.org/plugins/1.0.1/scm-cas-plugin.smp
 checksum: 8b596c60991a8b10c58fe0208c32143baa979707d9698ec4f2af0f5cc1c31c4c
 dependencies:
   - scm-mail-plugin
+optionalDependencies:
+  - scm-review-plugin
 conditions:
   os:
   - Linux
