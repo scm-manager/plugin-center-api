@@ -135,4 +135,12 @@ pipeline {
     }
 
   }
+
+  post {
+    failure {
+      mail to: "scm-team@cloudogu.com",
+        subject: "${JOB_NAME} - Build #${BUILD_NUMBER} - ${currentBuild.currentResult}!",
+        body: "Check console output at ${BUILD_URL} to view the results."
+    }
+  }
 }
