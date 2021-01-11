@@ -43,6 +43,7 @@ type Response struct {
 type RequestConditions struct {
 	Os      string
 	Arch    string
+	Jre     string
 	Version version.Version
 }
 
@@ -51,7 +52,7 @@ var (
 		Name: "scm_plugin_center_api_requests",
 		Help: "Total number of requests",
 	}, []string{
-		"version", "os", "arch",
+		"version", "os", "arch", "jre",
 	})
 )
 
@@ -72,6 +73,7 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			requestConditions.Version.String(),
 			requestConditions.Os,
 			requestConditions.Arch,
+			requestConditions.Jre,
 		).Inc()
 
 		urlGenerator := NewUrlGenerator(*r)
@@ -112,6 +114,7 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 	requestConditions := RequestConditions{
 		Os:      queryParameters.Get("os"),
 		Arch:    queryParameters.Get("arch"),
+		Jre:     queryParameters.Get("jre"),
 		Version: *requestVersion,
 	}
 	return requestConditions, nil
