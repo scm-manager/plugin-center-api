@@ -29,6 +29,7 @@ var testData = []Plugin{
 		DisplayName: "ssh plugin",
 		Description: "description for ssh plugin",
 		Category:    "test",
+		Type:        "CLOUDOGU",
 		Releases: []Release{
 			{
 				Version: "2.0",
@@ -42,6 +43,7 @@ var testData = []Plugin{
 				Url:                  "http://example.com",
 				Date:                 "1.01.2019",
 				Checksum:             "abc",
+				InstallLink:          "myCloudogu.com/install/my_plugin",
 			},
 			{
 				Version: "1.1",
