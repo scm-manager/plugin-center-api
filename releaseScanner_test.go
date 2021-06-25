@@ -19,7 +19,7 @@ func TestIfReleaseFilesAreRead(t *testing.T) {
 	plugins, err := scanDirectory(configuration.DescriptorDirectory)
 
 	assert.Nil(t, err, "unexpected error reading directory", err)
-	assert.Len(t, plugins, 3, "wrong number of plugins")
+	assert.Len(t, plugins, 4, "wrong number of plugins")
 }
 
 func TestIfPluginMetadataIsRead(t *testing.T) {

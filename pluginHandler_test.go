@@ -98,4 +98,16 @@ func TestPluginHandlerRewritesDownloadUrl(t *testing.T) {
 
 	assert.Contains(t, rr.Body.String(), `"name":"ssh-plugin"`)
 	assert.Contains(t, rr.Body.String(), `"version":"2.0"`)
+	assert.Contains(t, rr.Body.String(), `"type":"SCM"`)
+}
+
+func TestPluginHandlerGetsRightDataForCloudoguPlugin(t *testing.T) {
+	rr := initRouter("/api/v1/plugins/2.0.1", t, NewPluginHandler(testData))
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), `"name":"ssh-plugin"`)
+	assert.Contains(t, rr.Body.String(), `"version":"2.0"`)
+	assert.Contains(t, rr.Body.String(), `"type":"CLOUDOGU"`)
+	assert.Contains(t, rr.Body.String(), `"install":{"href":"myCloudogu.com/install/my_plugin"}`)
 }

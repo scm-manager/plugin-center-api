@@ -14,6 +14,7 @@ type Release struct {
 	Url                  string     `yaml:"url"`
 	Date                 string     `yaml:"date"`
 	Checksum             string     `yaml:"checksum"`
+	InstallLink          string     `yaml:"installLink"`
 }
 
 type Plugin struct {
@@ -23,4 +24,5 @@ type Plugin struct {
 	Category    string `yaml:"category"`
 	Releases    []Release
 	Author      string `yaml:"author"`
+	Type        string `yaml:"type"`
 }

@@ -26,6 +26,7 @@ type PluginResult struct {
 	Version              string       `json:"version"`
 	Author               string       `json:"author"`
 	Checksum             string       `json:"sha256sum"`
+	Type                 string       `json:"type"`
 	Conditions           ConditionMap `json:"conditions"`
 	Dependencies         []string     `json:"dependencies"`
 	OptionalDependencies []string     `json:"optionalDependencies"`
@@ -124,6 +125,10 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 	for _, release := range plugin.Releases {
 		if conditionsMatch(conditions, release.Conditions) {
 			url := generator.DownloadUrl(plugin, release.Version)
+			pluginType := plugin.Type
+			if pluginType == "" {
+				pluginType = "SCM"
+			}
 			result := PluginResult{
 				Name:                 plugin.Name,
 				DisplayName:          plugin.DisplayName,
@@ -132,16 +137,19 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Version:              release.Version,
 				Author:               plugin.Author,
 				Checksum:             release.Checksum,
+				Type:                 pluginType,
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
 				Links: Links{
 					"download": Link{Href: url},
+					"install":  Link{Href: release.InstallLink},
 				},
 			}
 			return append(results, result)
 		}
 	}
+
 	return results
 }
 
