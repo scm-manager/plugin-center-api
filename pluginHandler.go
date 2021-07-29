@@ -27,6 +27,7 @@ type PluginResult struct {
 	Author               string       `json:"author"`
 	Checksum             string       `json:"sha256sum"`
 	Type                 string       `json:"type"`
+	AvatarUrl            string       `json:"avatarUrl"`
 	Conditions           ConditionMap `json:"conditions"`
 	Dependencies         []string     `json:"dependencies"`
 	OptionalDependencies []string     `json:"optionalDependencies"`
@@ -138,6 +139,7 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Author:               plugin.Author,
 				Checksum:             release.Checksum,
 				Type:                 pluginType,
+				AvatarUrl:            plugin.AvatarUrl,
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),

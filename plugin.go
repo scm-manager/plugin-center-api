@@ -25,4 +25,5 @@ type Plugin struct {
 	Releases    []Release
 	Author      string `yaml:"author"`
 	Type        string `yaml:"type"`
+	AvatarUrl   string `yaml:"avatarUrl"`
 }

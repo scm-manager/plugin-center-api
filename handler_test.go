@@ -30,6 +30,7 @@ var testData = []Plugin{
 		Description: "description for ssh plugin",
 		Category:    "test",
 		Type:        "CLOUDOGU",
+		AvatarUrl:   "/images/ssh-logo.png",
 		Releases: []Release{
 			{
 				Version: "2.0",
