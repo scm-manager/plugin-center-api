@@ -130,6 +130,10 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 			if pluginType == "" {
 				pluginType = "SCM"
 			}
+			avatarUrl := plugin.AvatarUrl
+			if avatarUrl != "" {
+				avatarUrl = "https://scm-manager.org/img/" + avatarUrl
+			}
 			result := PluginResult{
 				Name:                 plugin.Name,
 				DisplayName:          plugin.DisplayName,
@@ -139,7 +143,7 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Author:               plugin.Author,
 				Checksum:             release.Checksum,
 				Type:                 pluginType,
-				AvatarUrl:            plugin.AvatarUrl,
+				AvatarUrl:            avatarUrl,
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
