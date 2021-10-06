@@ -28,7 +28,7 @@ pipeline {
     stage('Build') {
       agent {
         docker {
-          image 'golang:1.12.9'
+          image 'golang:1.13.10'
         }
       }
       environment {
@@ -44,7 +44,7 @@ pipeline {
     stage('Unit-Tests') {
       agent {
         docker {
-          image 'golang:1.12.9'
+          image 'golang:1.13.10'
         }
       }
       environment {
@@ -63,7 +63,7 @@ pipeline {
     stage('Process Unit-Test Results') {
       agent {
         docker {
-          image 'cloudogu/golang:1.12.7-1'
+          image 'cloudogu/golang:1.13.10-1'
         }
       }
       environment {
