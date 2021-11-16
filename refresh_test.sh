@@ -1,0 +1,7 @@
+#!/bin/bash
+
+TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmNmU0NGJlMC1lMjhlLTQ0MjQtOGZmYS1iYjMwODYwYTcyOTQifQ.eyJleHAiOjE2MzY5OTIxNjEsImlhdCI6MTYzNjk5MDM2MSwianRpIjoiYjM2YWM5MGUtMTY1ZS00YTFkLTg4ZTQtZjcxZWRhOTRmNWU1IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL21hc3RlciIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9hdXRoL3JlYWxtcy9tYXN0ZXIiLCJzdWIiOiJjY2QwZjRhNy02NDBhLTRlMTAtOTdlNy1hNGM2NDNmYThhYTgiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoicGx1Z2luLWNlbnRlciIsInNlc3Npb25fc3RhdGUiOiI0ODA4ZmJjYi04OWMyLTRjNDgtODQ5MS0xMGEzMjdjNGJhZjkiLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwic2lkIjoiNDgwOGZiY2ItODljMi00YzQ4LTg0OTEtMTBhMzI3YzRiYWY5In0.f_1jD6-aad2p28Crt4YrgT0quc-CmPDtr-XJU5nfyfE
+shift
+## curl -d client_id=plugin-center -d grant_type=refresh_token -d refresh_token=$TOKEN http://localhost:8080/auth/realms/master/protocol/openid-connect/token $@
+
+curl -X POST -d "{\"refresh_token\":\"$TOKEN\"}" http://localhost:8000/oidc/refresh $@

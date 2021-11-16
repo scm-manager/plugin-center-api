@@ -16,13 +16,17 @@ func main() {
 	if err != nil {
 		log.Fatalln("could not parse plugins", err)
 	}
+	oidc := NewOIDCHandler()
 
 	r := mux.NewRouter()
-	r.Handle("/api/v1/plugins/{version}", NewPluginHandler(plugins))
-	r.Handle("/api/v1/download/{plugin}/{version}", NewDownloadHandler(plugins))
+	r.Handle("/api/v1/plugins/{version}", oidc.Authenticate(NewPluginHandler(plugins)))
+	r.Handle("/api/v1/download/{plugin}/{version}", oidc.Authenticate(NewDownloadHandler(plugins)))
 	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/live", NewOkHandler())
 	r.HandleFunc("/ready", NewOkHandler())
+	r.HandleFunc("/oidc", oidc.Handler)
+	r.HandleFunc("/oidc/callback", oidc.Callback)
+	r.HandleFunc("/oidc/refresh", oidc.Refresh)
 
 	log.Println("start plugin center api on port", configuration.Port)
 

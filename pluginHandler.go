@@ -79,9 +79,10 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 		).Inc()
 
 		urlGenerator := NewUrlGenerator(*r)
+		authenticated := r.Context().Value("idToken") != nil
 
 		for _, plugin := range plugins {
-			pluginResults = appendIfOk(pluginResults, plugin, requestConditions, urlGenerator)
+			pluginResults = appendIfOk(pluginResults, plugin, requestConditions, urlGenerator, authenticated)
 		}
 
 		embedded := make(map[string]PluginResults)
@@ -122,13 +123,21 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 	return requestConditions, nil
 }
 
-func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions, generator UrlGenerator) []PluginResult {
+func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions, generator UrlGenerator, authenticated bool) []PluginResult {
 	for _, release := range plugin.Releases {
 		if conditionsMatch(conditions, release.Conditions) {
-			url := generator.DownloadUrl(plugin, release.Version)
+			links := Links{}
+
 			pluginType := plugin.Type
 			if pluginType == "" {
 				pluginType = "SCM"
+			}
+			if pluginType == "SCM" || authenticated {
+				url := generator.DownloadUrl(plugin, release.Version)
+				links["download"] = Link{Href: url}
+			}
+			if release.InstallLink != "" {
+				links["install"] = Link{Href: release.InstallLink}
 			}
 			avatarUrl := plugin.AvatarUrl
 			if avatarUrl != "" {
@@ -147,10 +156,7 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
-				Links: Links{
-					"download": Link{Href: url},
-					"install":  Link{Href: release.InstallLink},
-				},
+				Links:                links,
 			}
 			return append(results, result)
 		}
