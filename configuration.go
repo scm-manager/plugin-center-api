@@ -11,6 +11,14 @@ import (
 type Configuration struct {
 	DescriptorDirectory string `yaml:"descriptor-directory" envconfig:"CONFIG_DESCRIPTOR_DIRECTORY"`
 	Port                int    `yaml:"port" envconfig:"CONFIG_PORT" default:"8000"`
+	Oidc                OidcConfiguration
+}
+
+type OidcConfiguration struct {
+	Issuer       string `yaml:"issuer" envconfig:"CONFIG_OIDC_ISSUER"`
+	ClientID     string `yaml:"client-id" envconfig:"CONFIG_OIDC_CLIENT_ID"`
+	ClientSecret string `yaml:"client-secret" envconfig:"CONFIG_OIDC_CLIENT_SECRET"`
+	RedirectURL  string `yaml:"redirect-url" envconfig:"CONFIG_OIDC_REDIRECT_URL"`
 }
 
 func readConfiguration() Configuration {
@@ -20,6 +28,8 @@ func readConfiguration() Configuration {
 	}
 
 	config := Configuration{}
+	config.Oidc = OidcConfiguration{}
+
 	exists, err := exists(configPath)
 	if err != nil {
 		log.Fatalf("failed to check stat of %s: %v", configPath, err)
