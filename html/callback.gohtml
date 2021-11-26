@@ -1,0 +1,20 @@
+{{ template "layout.gohtml" . }}
+{{ define "content" }}
+    <div class="connect">
+      <img class="resource" src="/static/images/scm-instance.png" alt="SCM-Manager Instance">
+      <span class="arrow">&#8646;</span>
+      <img class="resource" src="/static/images/plugin-center.png" alt="SCM-Manager Plugin Center">
+    </div>
+    <div class="text">
+      <p>You are about to connect the instance <br/>
+        <strong>{{ .Instance }}</strong> <br/>
+        to the SCM-Manager Plugin Center by using the account <br/>
+        <strong>{{ .Account }}</strong>
+      </p>
+    </div>
+    <form method="POST" class="buttons" action="{{ .Endpoint }}">
+      <input type="hidden" name="refresh_token" value="{{ .RefreshToken }}">
+      <button class="button primary">Connect</button>
+      <a class="button warning" href="{{ .Endpoint }}">Abort</a>
+    </form>
+{{ end }}

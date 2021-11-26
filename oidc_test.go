@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/stretchr/testify/assert"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -14,12 +15,16 @@ import (
 )
 
 func createTestOidcHandler(issuer string) *OidcHandler {
+	static, err := fs.Sub(assets, "html")
+	if err != nil {
+		panic(err)
+	}
 	return NewOIDCHandler(OidcConfiguration{
 		issuer,
 		"pc-unit-test",
 		"unit-test-secret",
 		"http://localhost:8080/api/v1/auth/oidc/callback",
-	})
+	}, static)
 }
 
 func createOidcTestServer() *OidcTestServer {

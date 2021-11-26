@@ -1,6 +1,6 @@
 module github.com/scm-manager/plugin-center-api
 
-go 1.12
+go 1.16
 
 require (
 	github.com/coreos/go-oidc/v3 v3.1.0

@@ -1,7 +1,7 @@
 html {
-  height: 100%;
   box-sizing: border-box;
   font-size: 16px;
+  height: 100%;
 }
 
 *, *:before, *:after {
@@ -126,6 +126,7 @@ main {
   font-weight: 600;
 
   color: #363636;
+  text-decoration: none;
   cursor: pointer;
   justify-content: center;
   text-align: center;
@@ -155,4 +156,14 @@ main {
 .warning {
   background-color: #ffcf13;
   color: #88550D;
+}
+
+.error-icon {
+  color: #ff3860;
+  font-size: 10rem;
+}
+
+.error-message {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
 }
