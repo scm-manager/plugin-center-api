@@ -153,9 +153,17 @@ main {
   color: white;
 }
 
+.primary:hover {
+  background-color: #00a7b2;
+}
+
 .warning {
-  background-color: #ffcf13;
+  background-color: #ffd635;
   color: #88550D;
+}
+
+.warning:hover {
+  background-color: #ffcf13;
 }
 
 .error-icon {
