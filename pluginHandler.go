@@ -8,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Links map[string]Link
@@ -54,7 +55,7 @@ var (
 		Name: "scm_plugin_center_api_requests",
 		Help: "Total number of requests",
 	}, []string{
-		"version", "os", "arch", "jre",
+		"version", "os", "arch", "jre", "authenticated",
 	})
 )
 
@@ -71,15 +72,17 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 
 		log.Println("reading plugins for version", requestConditions.Version.Original())
 
+		authenticated := r.Context().Value("idToken") != nil
+
 		requestCounter.WithLabelValues(
 			requestConditions.Version.String(),
 			requestConditions.Os,
 			requestConditions.Arch,
 			requestConditions.Jre,
+			strconv.FormatBool(authenticated),
 		).Inc()
 
 		urlGenerator := NewUrlGenerator(*r)
-		authenticated := r.Context().Value("idToken") != nil
 
 		for _, plugin := range plugins {
 			pluginResults = appendIfOk(pluginResults, plugin, requestConditions, urlGenerator, authenticated)

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/oauth2"
 	"html/template"
 	"io/fs"
@@ -13,6 +15,23 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+)
+
+var (
+	authenticationRequestCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "scm_plugin_center_api_authentication_requests",
+		Help: "Total number of authentication requests",
+	}, []string{})
+
+	authenticationsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "scm_plugin_center_api_authentications",
+		Help: "Total number of authentications",
+	}, []string{})
+
+	refreshCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "scm_plugin_center_api_token_refresh",
+		Help: "Total number of token refresh",
+	}, []string{})
 )
 
 func NewOIDCHandler(configuration OidcConfiguration, templateFs fs.FS) *OidcHandler {
@@ -121,6 +140,7 @@ func (o *OidcHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 
 	authorizationHeader := r.Header.Get("Authorization")
 	if authorizationHeader == "" {
+		authenticationRequestCounter.WithLabelValues().Inc()
 		http.Redirect(w, r, o.config.AuthCodeURL(instance), http.StatusFound)
 		return
 	}
@@ -133,6 +153,7 @@ func (o *OidcHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 
 	_, err = o.verify(context.Background(), bearer)
 	if err != nil {
+		authenticationRequestCounter.WithLabelValues().Inc()
 		http.Redirect(w, r, o.config.AuthCodeURL(instance), http.StatusFound)
 		return
 	}
@@ -170,6 +191,8 @@ func (o *OidcHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		o.htmlError(w, "Failed to extract claim from ID Token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	authenticationsCounter.WithLabelValues().Inc()
 
 	account := claim.Email
 	if account == "" {
@@ -239,6 +262,8 @@ func (o *OidcHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	refreshCounter.WithLabelValues().Inc()
+
 	_, err = w.Write(response)
 	if err != nil {
 		log.Println("failed to write response to client", err)
@@ -267,7 +292,6 @@ func (o *OidcHandler) WithIdToken(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), "idToken", idToken)
-		// TODO metrics for authenticated access
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
