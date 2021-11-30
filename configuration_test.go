@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -10,10 +9,7 @@ import (
 func TestReadConfigurationFromConfigYaml(t *testing.T) {
 	config := readConfiguration()
 	assert.Equal(t, "resources/test/plugins", config.DescriptorDirectory)
-	assert.Equal(t, "http://localhost:8080/auth/realms/master", config.Oidc.Issuer)
-	assert.Equal(t, "plugin-center", config.Oidc.ClientID)
-	assert.Equal(t, "secret", config.Oidc.ClientSecret)
-	assert.Equal(t, "http://localhost:8080/api/v1/auth/oidc/callback", config.Oidc.RedirectURL)
+	assert.False(t, config.Oidc.IsEnabled())
 }
 
 func TestReadConfigurationFromEnv(t *testing.T) {
@@ -30,21 +26,18 @@ func TestReadConfigurationFromEnv(t *testing.T) {
 	assert.Equal(t, "pc", config.Oidc.ClientID)
 	assert.Equal(t, "secret123", config.Oidc.ClientSecret)
 	assert.Equal(t, "https://lo:3000/cb", config.Oidc.RedirectURL)
+	assert.True(t, config.Oidc.IsEnabled())
 }
 
 func TestReadConfigurationFromNonDefaultPath(t *testing.T) {
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "test-")
-	assert.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
-
-	text := []byte("descriptor-directory: /plugins")
-	_, err = tmpFile.Write(text)
-	assert.NoError(t, err)
-
-	t.Setenv("CONFIG", tmpFile.Name())
+	t.Setenv("CONFIG", "resources/test/oidc/config.yaml")
 
 	config := readConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
+	assert.Equal(t, "http://localhost:8080/auth/realms/master", config.Oidc.Issuer)
+	assert.Equal(t, "plugin-center", config.Oidc.ClientID)
+	assert.Equal(t, "secret", config.Oidc.ClientSecret)
+	assert.Equal(t, "http://localhost:8080/api/v1/auth/oidc/callback", config.Oidc.RedirectURL)
 }
 
 func TestReadConfigurationWithoutConfigYaml(t *testing.T) {

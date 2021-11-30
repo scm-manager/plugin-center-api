@@ -27,18 +27,28 @@ func main() {
 		log.Fatal("failed to load static files", err)
 	}
 
-	oidc := NewOIDCHandler(configuration.Oidc, static)
-
 	r := mux.NewRouter()
 
-	// api
-	r.Handle("/api/v1/plugins/{version}", oidc.WithIdToken(NewPluginHandler(plugins)))
-	r.Handle("/api/v1/download/{plugin}/{version}", oidc.WithIdToken(NewDownloadHandler(plugins)))
+	authentication := func(handler http.Handler) http.Handler {
+		return handler
+	}
 
 	// oidc
-	r.HandleFunc("/api/v1/auth/oidc", oidc.Authenticate)
-	r.HandleFunc("/api/v1/auth/oidc/callback", oidc.Callback)
-	r.HandleFunc("/api/v1/auth/oidc/refresh", oidc.Refresh)
+	if configuration.Oidc.IsEnabled() {
+		oidc := NewOIDCHandler(configuration.Oidc, static)
+
+		authentication = oidc.WithIdToken
+
+		r.HandleFunc("/api/v1/auth/oidc", oidc.Authenticate)
+		r.HandleFunc("/api/v1/auth/oidc/callback", oidc.Callback)
+		r.HandleFunc("/api/v1/auth/oidc/refresh", oidc.Refresh)
+	} else {
+		log.Println("plugin center api starts without authentication support")
+	}
+
+	// api
+	r.Handle("/api/v1/plugins/{version}", authentication(NewPluginHandler(plugins)))
+	r.Handle("/api/v1/download/{plugin}/{version}", authentication(NewDownloadHandler(plugins)))
 
 	// static assets
 	r.PathPrefix("/static").Handler(http.FileServer(http.FS(static)))

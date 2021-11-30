@@ -21,6 +21,10 @@ type OidcConfiguration struct {
 	RedirectURL  string `yaml:"redirect-url" envconfig:"CONFIG_OIDC_REDIRECT_URL"`
 }
 
+func (oc OidcConfiguration) IsEnabled() bool {
+	return oc.Issuer != ""
+}
+
 func readConfiguration() Configuration {
 	configPath := os.Getenv("CONFIG")
 	if configPath == "" {
