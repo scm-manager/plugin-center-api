@@ -9,11 +9,12 @@
       <p>You are about to connect the instance <br/>
         <strong>{{ .Instance }}</strong> <br/>
         to the SCM-Manager Plugin Center by using the account <br/>
-        <strong>{{ .Account }}</strong>
+        <strong>{{ .Subject }}</strong>
       </p>
     </div>
     <form method="POST" class="buttons" action="{{ .Endpoint }}">
       <input type="hidden" name="refresh_token" value="{{ .RefreshToken }}">
+      <input type="hidden" name="subject" value="{{ .Subject }}">
       <button class="button primary">Connect</button>
       <a class="button warning" href="{{ .Endpoint }}">Abort</a>
     </form>

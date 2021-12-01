@@ -194,17 +194,17 @@ func (o *OidcHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	authenticationsCounter.WithLabelValues().Inc()
 
-	account := claim.Email
-	if account == "" {
-		account = claim.Username
-		if account == "" {
-			account = idToken.Subject
+	subject := claim.Email
+	if subject == "" {
+		subject = claim.Username
+		if subject == "" {
+			subject = idToken.Subject
 		}
 	}
 
 	model := CallbackModel{
 		Instance:     instanceUrl.Host,
-		Account:      account,
+		Subject:      subject,
 		RefreshToken: oauth2Token.RefreshToken,
 		Endpoint:     instance,
 	}
@@ -225,7 +225,7 @@ type KeycloakClaim struct {
 
 type CallbackModel struct {
 	Instance     string
-	Account      string
+	Subject      string
 	RefreshToken string
 	Endpoint     string
 }
@@ -274,7 +274,6 @@ func (o *OidcHandler) WithIdToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorizationHeader := r.Header.Get("Authorization")
 		if authorizationHeader == "" {
-			//TODO metrics for anonymous access
 			next.ServeHTTP(w, r)
 			return
 		}
