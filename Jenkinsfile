@@ -28,7 +28,7 @@ pipeline {
     stage('Build') {
       agent {
         docker {
-          image 'golang:1.13.10'
+          image 'golang:1.16.10'
         }
       }
       environment {
@@ -44,7 +44,7 @@ pipeline {
     stage('Unit-Tests') {
       agent {
         docker {
-          image 'golang:1.13.10'
+          image 'golang:1.16.10'
         }
       }
       environment {
