@@ -15,9 +15,17 @@ var assets embed.FS
 
 func main() {
 	configuration := readConfiguration()
+	r := configureRouter(configuration)
 
+	log.Println("start plugin center api on port", configuration.Port)
+	err := http.ListenAndServe(":"+strconv.Itoa(configuration.Port), r)
+	if err != nil {
+		log.Fatal("http server returned err: ", err)
+	}
+}
+
+func configureRouter(configuration Configuration) *mux.Router {
 	plugins, err := scanDirectory(configuration.DescriptorDirectory)
-
 	if err != nil {
 		log.Fatalln("could not parse plugins", err)
 	}
@@ -60,12 +68,7 @@ func main() {
 	r.HandleFunc("/live", NewOkHandler())
 	r.HandleFunc("/ready", NewOkHandler())
 
-	log.Println("start plugin center api on port", configuration.Port)
-
-	err = http.ListenAndServe(":"+strconv.Itoa(configuration.Port), r)
-	if err != nil {
-		log.Fatal("http server returned err: ", err)
-	}
+	return r
 }
 
 func NewOkHandler() http.HandlerFunc {
