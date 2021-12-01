@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -246,4 +247,74 @@ func TestOidcHandler_WithIdToken(t *testing.T) {
 	o.WithIdToken(&SubjectHandler{}).ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestOidcHandler_RefreshFailWithoutBody(t *testing.T) {
+	server := createOidcTestServer()
+	defer server.Close()
+
+	handler := createTestOidcHandler(server.URL)
+
+	r := httptest.NewRequest(http.MethodGet, "/id-token", nil)
+	w := httptest.NewRecorder()
+
+	handler.Refresh(w, r)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestOidcHandler_RefreshWithInvalidJson(t *testing.T) {
+	server := createOidcTestServer()
+	defer server.Close()
+
+	handler := createTestOidcHandler(server.URL)
+
+	r := httptest.NewRequest(http.MethodGet, "/id-token", bytes.NewBuffer([]byte("abc")))
+	w := httptest.NewRecorder()
+
+	handler.Refresh(w, r)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestOidcHandler_RefreshWithoutRefreshToken(t *testing.T) {
+	server := createOidcTestServer()
+	defer server.Close()
+
+	handler := createTestOidcHandler(server.URL)
+
+	r := httptest.NewRequest(http.MethodGet, "/id-token", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+
+	handler.Refresh(w, r)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestOidcHandler_CallbackWithoutState(t *testing.T) {
+	server := createOidcTestServer()
+	defer server.Close()
+
+	handler := createTestOidcHandler(server.URL)
+
+	r := httptest.NewRequest(http.MethodGet, "/id-token", nil)
+	w := httptest.NewRecorder()
+
+	handler.Callback(w, r)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestOidcHandler_CallbackWithInvalidState(t *testing.T) {
+	server := createOidcTestServer()
+	defer server.Close()
+
+	handler := createTestOidcHandler(server.URL)
+
+	r := httptest.NewRequest(http.MethodGet, "/id-token?state=nonUrl", nil)
+	w := httptest.NewRecorder()
+
+	handler.Callback(w, r)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
