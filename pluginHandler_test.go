@@ -7,7 +7,7 @@ import (
 )
 
 func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1?os=linux&arch=64", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -15,7 +15,7 @@ func TestPluginHandlerHasEmbeddedCollection(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1?os=linux&arch=64", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -29,7 +29,7 @@ func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1?os=linux&arch=64", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -40,7 +40,7 @@ func TestPluginHandlerReturnsConditionsFromRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsDependenciesFromRelease(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=64", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1?os=linux&arch=64", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -49,7 +49,7 @@ func TestPluginHandlerReturnsDependenciesFromRelease(t *testing.T) {
 }
 
 func TestPluginHandlerReturnsEmptyDependenciesWhenNotSetInRelease(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/1.0.0?os=windows", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/1.0.0?os=windows", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -57,7 +57,7 @@ func TestPluginHandlerReturnsEmptyDependenciesWhenNotSetInRelease(t *testing.T) 
 }
 
 func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.0?os=linux&arch=64", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.0?os=linux&arch=64", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -66,7 +66,7 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=windows&arch=64", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1?os=windows&arch=64", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -75,7 +75,7 @@ func TestPluginHandlerFiltersForOs(t *testing.T) {
 }
 
 func TestPluginHandlerFiltersForArch(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1?os=linux&arch=32", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1?os=linux&arch=32", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -83,7 +83,7 @@ func TestPluginHandlerFiltersForArch(t *testing.T) {
 }
 
 func TestPluginHandlerTreatsOsAndArchAsOptional(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -92,7 +92,7 @@ func TestPluginHandlerTreatsOsAndArchAsOptional(t *testing.T) {
 }
 
 func TestPluginHandlerRewritesDownloadUrl(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -102,7 +102,7 @@ func TestPluginHandlerRewritesDownloadUrl(t *testing.T) {
 }
 
 func TestPluginHandlerGetsRightDataForCloudoguPlugin(t *testing.T) {
-	rr := initRouter("/api/v1/plugins/2.0.1", t, NewPluginHandler(testData))
+	rr := initRouter(t, "/api/v1/plugins/2.0.1", "", NewPluginHandler(testData))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 

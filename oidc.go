@@ -290,7 +290,14 @@ func (o *OidcHandler) WithIdToken(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "idToken", idToken)
+		subject := Subject{
+			Id: idToken.Subject,
+		}
+		ctx := context.WithValue(r.Context(), "subject", &subject)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+type Subject struct {
+	Id string
 }

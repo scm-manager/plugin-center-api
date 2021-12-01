@@ -27,3 +27,14 @@ type Plugin struct {
 	Type        string `yaml:"type"`
 	AvatarUrl   string `yaml:"avatarUrl"`
 }
+
+func (p Plugin) GetType() string {
+	if p.Type == "" {
+		return "SCM"
+	}
+	return p.Type
+}
+
+func (p Plugin) RequiresAuthentication() bool {
+	return p.GetType() != "SCM"
+}

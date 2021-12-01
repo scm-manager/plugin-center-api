@@ -1,16 +1,22 @@
 package main
 
 import (
+	"context"
 	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func initRouter(url string, t *testing.T, handler func(http.ResponseWriter, *http.Request)) *httptest.ResponseRecorder {
+func initRouter(t *testing.T, url string, subject string, handler func(http.ResponseWriter, *http.Request)) *httptest.ResponseRecorder {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if subject != "" {
+		ctx := context.WithValue(req.Context(), "subject", &Subject{Id: subject})
+		req = req.WithContext(ctx)
 	}
 
 	rr := httptest.NewRecorder()

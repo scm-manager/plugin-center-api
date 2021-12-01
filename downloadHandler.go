@@ -64,11 +64,26 @@ func createMap(plugins []Plugin) map[string]Plugin {
 
 func (h *DownloadHandler) handle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
 	pluginName := vars["plugin"]
+	plugin, ok := h.plugins[pluginName]
+	if !ok {
+		msg := fmt.Sprintf("no plugin found for name %s", pluginName)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusNotFound)
+		return
+	}
+
+	authenticated := r.Context().Value("subject") != nil
+	if plugin.RequiresAuthentication() && !authenticated {
+		msg := fmt.Sprintf("plugin %s requires authentication", pluginName)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusUnauthorized)
+		return
+	}
+
 	pluginVersion := vars["version"]
-
-	release := h.findRelease(pluginName, pluginVersion)
-
+	release := h.findRelease(plugin, pluginVersion)
 	if release == nil {
 		msg := fmt.Sprintf("no plugin found for name %s and version %s", pluginName, pluginVersion)
 		log.Println(msg)
@@ -101,8 +116,7 @@ func (h *DownloadHandler) copyHttpStream(release *Release, pluginName string, pl
 	}
 }
 
-func (h *DownloadHandler) findRelease(name string, version string) *Release {
-	plugin := h.plugins[name]
+func (h *DownloadHandler) findRelease(plugin Plugin, version string) *Release {
 	for _, release := range plugin.Releases {
 		if release.Version == version {
 			return &release

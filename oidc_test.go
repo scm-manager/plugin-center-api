@@ -34,12 +34,12 @@ func createOidcTestServer() *OidcTestServer {
 	return oidcServer
 }
 
-type IdTokenHandler struct {
+type SubjectHandler struct {
 }
 
-func (oe *IdTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	idToken := r.Context().Value("idToken")
-	if idToken != nil {
+func (oe *SubjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	subject := r.Context().Value("subject")
+	if subject != nil {
 		w.WriteHeader(http.StatusOK)
 	} else {
 		w.WriteHeader(http.StatusNoContent)
@@ -177,7 +177,7 @@ func TestOidcHandler_WithIdToken_withoutAuthorization(t *testing.T) {
 
 	r := httptest.NewRequest(http.MethodGet, "/id-token", nil)
 	w := httptest.NewRecorder()
-	o.WithIdToken(&IdTokenHandler{}).ServeHTTP(w, r)
+	o.WithIdToken(&SubjectHandler{}).ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusNoContent, w.Code)
 }
@@ -192,7 +192,7 @@ func TestOidcHandler_WithIdToken_withMalformedAuthorization(t *testing.T) {
 	r.Header.Set("Authorization", "xyz")
 
 	w := httptest.NewRecorder()
-	o.WithIdToken(&IdTokenHandler{}).ServeHTTP(w, r)
+	o.WithIdToken(&SubjectHandler{}).ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
@@ -207,7 +207,7 @@ func TestOidcHandler_WithIdToken_withInvalidScheme(t *testing.T) {
 	r.Header.Set("Authorization", "Basic xyz")
 
 	w := httptest.NewRecorder()
-	o.WithIdToken(&IdTokenHandler{}).ServeHTTP(w, r)
+	o.WithIdToken(&SubjectHandler{}).ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
@@ -225,7 +225,7 @@ func TestOidcHandler_WithIdToken_withFailedAuthentication(t *testing.T) {
 	r.Header.Set("Authorization", "Bearer abc")
 
 	w := httptest.NewRecorder()
-	o.WithIdToken(&IdTokenHandler{}).ServeHTTP(w, r)
+	o.WithIdToken(&SubjectHandler{}).ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
@@ -243,7 +243,7 @@ func TestOidcHandler_WithIdToken(t *testing.T) {
 	r.Header.Set("Authorization", "Bearer awesome")
 
 	w := httptest.NewRecorder()
-	o.WithIdToken(&IdTokenHandler{}).ServeHTTP(w, r)
+	o.WithIdToken(&SubjectHandler{}).ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }

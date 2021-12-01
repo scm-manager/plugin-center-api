@@ -72,7 +72,7 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 
 		log.Println("reading plugins for version", requestConditions.Version.Original())
 
-		authenticated := r.Context().Value("idToken") != nil
+		authenticated := r.Context().Value("subject") != nil
 
 		requestCounter.WithLabelValues(
 			requestConditions.Version.String(),
@@ -135,7 +135,7 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 			if pluginType == "" {
 				pluginType = "SCM"
 			}
-			if pluginType == "SCM" || authenticated {
+			if !plugin.RequiresAuthentication() || authenticated {
 				url := generator.DownloadUrl(plugin, release.Version)
 				links["download"] = Link{Href: url}
 			}
