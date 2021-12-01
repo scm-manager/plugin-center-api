@@ -129,7 +129,7 @@ pipeline {
       }
       steps {
         withCredentials([file(credentialsId: 'helm-client-scm-manager', variable: 'KUBECONFIG')]) {
-          sh "helm upgrade --install --set image.tag=${version} plugin-center-api helm/plugin-center-api"
+          sh "helm upgrade --install --set image.tag=${version} plugin-center-api helm/plugin-center-api --set oidcSecret=plugin-center-api-oidc"
         }
       }
     }

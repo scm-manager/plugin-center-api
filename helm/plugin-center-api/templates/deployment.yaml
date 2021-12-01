@@ -41,6 +41,29 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.oidcSecret }}
+          env:
+          - name: CONFIG_OIDC_ISSUER
+            valueFrom:
+              secretkeyRef:
+                name: {{ .Values.oidcSecret }}
+                key: CONFIG_OIDC_ISSUER
+          - name: CONFIG_OIDC_CLIENT_ID
+            valueFrom:
+              secretkeyRef:
+                name: {{ .Values.oidcSecret }}
+                key: CONFIG_OIDC_CLIENT_ID
+          - name: CONFIG_OIDC_CLIENT_SECRET
+            valueFrom:
+              secretkeyRef:
+                name: {{ .Values.oidcSecret }}
+                key: CONFIG_OIDC_CLIENT_SECRET
+          - name: CONFIG_OIDC_REDIRECT_URL
+            valueFrom:
+              secretkeyRef:
+                name: {{ .Values.oidcSecret }}
+                key: CONFIG_OIDC_REDIRECT_URL
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
