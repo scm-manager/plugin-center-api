@@ -45,22 +45,22 @@ spec:
           env:
           - name: CONFIG_OIDC_ISSUER
             valueFrom:
-              secretkeyRef:
+              secretKeyRef:
                 name: {{ .Values.oidcSecret }}
                 key: CONFIG_OIDC_ISSUER
           - name: CONFIG_OIDC_CLIENT_ID
             valueFrom:
-              secretkeyRef:
+              secretKeyRef:
                 name: {{ .Values.oidcSecret }}
                 key: CONFIG_OIDC_CLIENT_ID
           - name: CONFIG_OIDC_CLIENT_SECRET
             valueFrom:
-              secretkeyRef:
+              secretKeyRef:
                 name: {{ .Values.oidcSecret }}
                 key: CONFIG_OIDC_CLIENT_SECRET
           - name: CONFIG_OIDC_REDIRECT_URL
             valueFrom:
-              secretkeyRef:
+              secretKeyRef:
                 name: {{ .Values.oidcSecret }}
                 key: CONFIG_OIDC_REDIRECT_URL
           {{- end }}
