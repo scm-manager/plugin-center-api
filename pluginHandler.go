@@ -129,19 +129,17 @@ func extractRequestConditions(r *http.Request) (RequestConditions, error) {
 func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditions, generator UrlGenerator, authenticated bool) []PluginResult {
 	for _, release := range plugin.Releases {
 		if conditionsMatch(conditions, release.Conditions) {
-			links := Links{}
 
 			pluginType := plugin.Type
 			if pluginType == "" {
 				pluginType = "SCM"
 			}
+
+      downloadUrl := ""
 			if !plugin.RequiresAuthentication() || authenticated {
-				url := generator.DownloadUrl(plugin, release.Version)
-				links["download"] = Link{Href: url}
+        downloadUrl = generator.DownloadUrl(plugin, release.Version)
 			}
-			if release.InstallLink != "" {
-				links["install"] = Link{Href: release.InstallLink}
-			}
+
 			avatarUrl := plugin.AvatarUrl
 			if avatarUrl != "" {
 				avatarUrl = "https://scm-manager.org/img/" + avatarUrl
@@ -159,7 +157,10 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
-				Links:                links,
+        Links: Links{
+          "download": Link{Href: downloadUrl},
+          "install":  Link{Href: release.InstallLink},
+        },
 			}
 			return append(results, result)
 		}
