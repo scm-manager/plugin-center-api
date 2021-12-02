@@ -175,3 +175,15 @@ main {
   font-size: 1.5rem;
   margin-bottom: 2rem;
 }
+
+.imprint {
+  color: white;
+  text-decoration: none;
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.imprint:hover {
+  text-decoration: underline;
+}
