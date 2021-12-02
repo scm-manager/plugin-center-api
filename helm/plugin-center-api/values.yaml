@@ -26,6 +26,7 @@ ingress:
     - host: plugin-center-api.scm-manager.org
       paths:
         - /api
+        - /static
 
   tls:
     - secretName: plugin-center-api-tls-secret
