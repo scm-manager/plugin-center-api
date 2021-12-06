@@ -19,6 +19,7 @@ type OidcConfiguration struct {
 	ClientID     string `yaml:"client-id" envconfig:"CONFIG_OIDC_CLIENT_ID"`
 	ClientSecret string `yaml:"client-secret" envconfig:"CONFIG_OIDC_CLIENT_SECRET"`
 	RedirectURL  string `yaml:"redirect-url" envconfig:"CONFIG_OIDC_REDIRECT_URL"`
+	development  bool
 }
 
 func (oc OidcConfiguration) IsEnabled() bool {
@@ -32,7 +33,9 @@ func readConfiguration() Configuration {
 	}
 
 	config := Configuration{}
-	config.Oidc = OidcConfiguration{}
+	config.Oidc = OidcConfiguration{
+		development: false,
+	}
 
 	exists, err := exists(configPath)
 	if err != nil {

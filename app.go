@@ -43,7 +43,10 @@ func configureRouter(configuration Configuration) *mux.Router {
 
 	// oidc
 	if configuration.Oidc.IsEnabled() {
-		oidc := NewOIDCHandler(configuration.Oidc, static)
+		oidc, err := NewOIDCHandler(configuration.Oidc, static)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		authentication = oidc.WithIdToken
 

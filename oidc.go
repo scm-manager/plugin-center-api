@@ -34,32 +34,44 @@ var (
 	}, []string{})
 )
 
-func NewOIDCHandler(configuration OidcConfiguration, templateFs fs.FS) *OidcHandler {
+func NewOIDCHandler(configuration OidcConfiguration, templateFs fs.FS) (*OidcHandler, error) {
 	provider, err := oidc.NewProvider(context.Background(), configuration.Issuer)
 	if err != nil {
-		log.Fatal("failed to create oidc provider", err)
+		return nil, fmt.Errorf("failed to create oidc provider: %w", err)
 	}
 
 	errorTemplate, err := template.ParseFS(templateFs, "layout.gohtml", "error.gohtml")
 	if err != nil {
-		log.Fatal("failed to load templates", err)
+		return nil, fmt.Errorf("failed to load error template: %w", err)
 	}
 
 	callbackTemplate, err := template.ParseFS(templateFs, "layout.gohtml", "callback.gohtml")
 	if err != nil {
-		log.Fatal("failed to load templates", err)
+		return nil, fmt.Errorf("failed to load callback template: %w", err)
+	}
+
+	endpoint := provider.Endpoint()
+	if configuration.development {
+		// mockoidc, fails without manually set AuthStyleInParams
+		endpoint.AuthStyle = oauth2.AuthStyleInParams
 	}
 
 	config := oauth2.Config{
 		ClientID:     configuration.ClientID,
 		ClientSecret: configuration.ClientSecret,
 		RedirectURL:  configuration.RedirectURL,
-		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "email"},
+		Endpoint:     endpoint,
+		Scopes:       []string{oidc.ScopeOpenID, "email", "profile"},
 	}
 
-	verify := provider.Verifier(&oidc.Config{ClientID: configuration.ClientID}).Verify
-	return &OidcHandler{provider, config, errorTemplate, callbackTemplate, verify}
+	verifier := provider.Verifier(&oidc.Config{ClientID: configuration.ClientID})
+	return &OidcHandler{
+		provider,
+		config,
+		errorTemplate,
+		callbackTemplate,
+		verifier,
+	}, nil
 }
 
 type OidcHandler struct {
@@ -67,7 +79,7 @@ type OidcHandler struct {
 	config           oauth2.Config
 	errorTemplate    *template.Template
 	callbackTemplate *template.Template
-	verify           func(ctx context.Context, token string) (*oidc.IDToken, error)
+	verifier         *oidc.IDTokenVerifier
 }
 
 type RefreshRequest struct {
@@ -151,7 +163,7 @@ func (o *OidcHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = o.verify(context.Background(), bearer)
+	_, err = o.verifier.Verify(context.Background(), bearer)
 	if err != nil {
 		authenticationRequestCounter.WithLabelValues().Inc()
 		http.Redirect(w, r, o.config.AuthCodeURL(instance), http.StatusFound)
@@ -169,7 +181,7 @@ func (o *OidcHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	oauth2Token, err := o.config.Exchange(context.Background(), r.URL.Query().Get("code"))
 	if err != nil {
-		o.htmlError(w, fmt.Sprintf("Failed to exchange token: %v", err), http.StatusInternalServerError)
+		o.htmlError(w, fmt.Sprintf("Failed to exchange token: %v", err), http.StatusUnauthorized)
 		return
 	}
 
@@ -179,13 +191,13 @@ func (o *OidcHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idToken, err := o.verify(context.Background(), rawIDToken)
+	idToken, err := o.verifier.Verify(context.Background(), rawIDToken)
 	if err != nil {
 		o.htmlError(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	claim := KeycloakClaim{}
+	claim := OidcClaim{}
 	err = idToken.Claims(&claim)
 	if err != nil {
 		o.htmlError(w, "Failed to extract claim from ID Token: "+err.Error(), http.StatusInternalServerError)
@@ -217,7 +229,7 @@ func (o *OidcHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type KeycloakClaim struct {
+type OidcClaim struct {
 	Name     string `json:"name"`
 	Username string `json:"preferred_username"`
 	Email    string `json:"email"`
@@ -284,7 +296,7 @@ func (o *OidcHandler) WithIdToken(next http.Handler) http.Handler {
 			return
 		}
 
-		idToken, err := o.verify(context.Background(), bearer)
+		idToken, err := o.verifier.Verify(context.Background(), bearer)
 		if err != nil {
 			o.jsonError(w, fmt.Sprintf("Authentication failed: %v", err), http.StatusUnauthorized)
 			return

@@ -7,9 +7,9 @@
     </div>
     <div class="text">
       <p>You are about to connect the instance <br/>
-        <strong>{{ .Instance }}</strong> <br/>
+        <strong id="instance">{{ .Instance }}</strong> <br/>
         to the SCM-Manager Plugin Center by using the account <br/>
-        <strong>{{ .Subject }}</strong>
+        <strong id="subject">{{ .Subject }}</strong>
       </p>
     </div>
     <form method="POST" class="buttons" action="{{ .Endpoint }}">
