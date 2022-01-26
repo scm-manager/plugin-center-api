@@ -3,11 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/oauth2-proxy/mockoidc"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/oauth2"
 	"io/fs"
 	"io/ioutil"
 	"net/http"
@@ -17,7 +12,17 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/oauth2-proxy/mockoidc"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
 )
+
+func init() {
+	mockoidc.ScopesSupported = append(mockoidc.ScopesSupported, "offline_access")
+}
 
 func createTestOidcHandler(t *testing.T, server *OidcTestServer) *OidcHandler {
 	static, err := fs.Sub(assets, "html")

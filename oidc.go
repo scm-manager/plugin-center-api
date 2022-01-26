@@ -4,10 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"golang.org/x/oauth2"
 	"html/template"
 	"io/fs"
 	"io/ioutil"
@@ -15,6 +11,11 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -61,7 +62,7 @@ func NewOIDCHandler(configuration OidcConfiguration, templateFs fs.FS) (*OidcHan
 		ClientSecret: configuration.ClientSecret,
 		RedirectURL:  configuration.RedirectURL,
 		Endpoint:     endpoint,
-		Scopes:       []string{oidc.ScopeOpenID, "email", "profile"},
+		Scopes:       []string{oidc.ScopeOpenID, "email", "profile", "offline_access"},
 	}
 
 	verifier := provider.Verifier(&oidc.Config{ClientID: configuration.ClientID})
