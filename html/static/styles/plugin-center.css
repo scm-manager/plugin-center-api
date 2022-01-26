@@ -177,13 +177,17 @@ main {
 }
 
 .imprint {
-  color: white;
-  text-decoration: none;
   position: absolute;
   bottom: 1rem;
   right: 1rem;
 }
 
-.imprint:hover {
+.imprint a {
+  margin: 0 0.25rem;
+  color: white;
+  text-decoration: none;
+}
+
+.imprint a:hover {
   text-decoration: underline;
 }
