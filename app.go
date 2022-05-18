@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -18,10 +19,17 @@ func main() {
 	r := configureRouter(configuration)
 
 	log.Println("start plugin center api on port", configuration.Port)
-	err := http.ListenAndServe(":"+strconv.Itoa(configuration.Port), r)
+	err := http.ListenAndServe(getListenerAddress(configuration.Port), r)
 	if err != nil {
 		log.Fatal("http server returned err: ", err)
 	}
+}
+
+func getListenerAddress(port int) string {
+	if os.Getenv("STAGE") == "development" {
+		return "127.0.0.1:" + strconv.Itoa(port)
+	}
+	return ":" + strconv.Itoa(port)
 }
 
 func configureRouter(configuration Configuration) *mux.Router {
