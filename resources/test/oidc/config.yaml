@@ -1,4 +1,5 @@
 descriptor-directory: /plugins
+plugin-sets-directory: /plugin-sets
 oidc:
   issuer: http://localhost:8080/auth/realms/master
   client-id: plugin-center

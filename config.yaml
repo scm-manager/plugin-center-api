@@ -1,1 +1,2 @@
 descriptor-directory: resources/test/plugins
+plugin-sets-directory: resources/test/plugin-sets

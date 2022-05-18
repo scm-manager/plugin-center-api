@@ -10,6 +10,7 @@ import (
 
 type Configuration struct {
 	DescriptorDirectory string `yaml:"descriptor-directory" envconfig:"CONFIG_DESCRIPTOR_DIRECTORY"`
+	PluginSetsDirectory string `yaml:"plugin-sets-directory" envconfig:"CONFIG_PLUGIN_SETS_DIRECTORY"`
 	Port                int    `yaml:"port" envconfig:"CONFIG_PORT" default:"8000"`
 	Oidc                OidcConfiguration
 }

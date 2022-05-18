@@ -9,7 +9,8 @@ The location of the configuration can be specified with the `CONFIG` environment
 if nothing is specified `config.yaml` is used.
 The following parameters can be configured:
 
-| Yaml Key | Environment Variable | Default value |
-|---|---|---|
-| descriptor-directory | CONFIG_DESCRIPTOR_DIRECTORY | - |
-| port | CONFIG_PORT | 8000 |
+| Yaml Key              | Environment Variable         | Default value |
+|-----------------------|------------------------------|---|
+| descriptor-directory  | CONFIG_DESCRIPTOR_DIRECTORY  | - |
+| plugin-sets-directory | CONFIG_PLUGIN_SETS_DIRECTORY | - |
+| port                  | CONFIG_PORT                  | 8000 |
