@@ -1,0 +1,3 @@
+id: administration-and-management
+plugins:
+  - scm-cas-plugin

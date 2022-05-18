@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"encoding/json"
@@ -135,9 +135,9 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				pluginType = "SCM"
 			}
 
-      downloadUrl := ""
+			downloadUrl := ""
 			if !plugin.RequiresAuthentication() || authenticated {
-        downloadUrl = generator.DownloadUrl(plugin, release.Version)
+				downloadUrl = generator.DownloadUrl(plugin, release.Version)
 			}
 
 			avatarUrl := plugin.AvatarUrl
@@ -157,10 +157,10 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
-        Links: Links{
-          "download": Link{Href: downloadUrl},
-          "install":  Link{Href: release.InstallLink},
-        },
+				Links: Links{
+					"download": Link{Href: downloadUrl},
+					"install":  Link{Href: release.InstallLink},
+				},
 			}
 			return append(results, result)
 		}

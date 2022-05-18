@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestReadConfigurationFromConfigYaml(t *testing.T) {
-	config := readConfiguration()
+	config := ReadConfiguration()
 	assert.Equal(t, "resources/test/plugins", config.DescriptorDirectory)
 	assert.False(t, config.Oidc.IsEnabled())
 }
@@ -20,7 +20,7 @@ func TestReadConfigurationFromEnv(t *testing.T) {
 	t.Setenv("CONFIG_OIDC_CLIENT_SECRET", "secret123")
 	t.Setenv("CONFIG_OIDC_REDIRECT_URL", "https://lo:3000/cb")
 
-	config := readConfiguration()
+	config := ReadConfiguration()
 
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
 	assert.Equal(t, "/plugin-sets", config.PluginSetsDirectory)
@@ -34,7 +34,7 @@ func TestReadConfigurationFromEnv(t *testing.T) {
 func TestReadConfigurationFromNonDefaultPath(t *testing.T) {
 	t.Setenv("CONFIG", "resources/test/oidc/config.yaml")
 
-	config := readConfiguration()
+	config := ReadConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
 	assert.Equal(t, "/plugin-sets", config.PluginSetsDirectory)
 	assert.Equal(t, "http://localhost:8080/auth/realms/master", config.Oidc.Issuer)
@@ -56,7 +56,7 @@ func TestReadConfigurationWithoutConfigYaml(t *testing.T) {
 	t.Setenv("CONFIG_DESCRIPTOR_DIRECTORY", "/plugins")
 	t.Setenv("CONFIG_PLUGIN_SETS_DIRECTORY", "/plugin-sets")
 
-	config := readConfiguration()
+	config := ReadConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
 	assert.Equal(t, "/plugin-sets", config.PluginSetsDirectory)
 }
@@ -64,13 +64,13 @@ func TestReadConfigurationWithoutConfigYaml(t *testing.T) {
 func TestReadConfigurationFromConfigYamlAndEnvironment(t *testing.T) {
 	t.Setenv("CONFIG_PORT", "8082")
 
-	config := readConfiguration()
+	config := ReadConfiguration()
 	assert.Equal(t, "resources/test/plugins", config.DescriptorDirectory)
 	assert.Equal(t, "resources/test/plugin-sets", config.PluginSetsDirectory)
 	assert.Equal(t, 8082, config.Port)
 }
 
 func TestReadConfigurationAndUseDefaults(t *testing.T) {
-	config := readConfiguration()
+	config := ReadConfiguration()
 	assert.Equal(t, 8000, config.Port)
 }

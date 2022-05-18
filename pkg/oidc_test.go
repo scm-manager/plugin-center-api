@@ -1,8 +1,9 @@
-package main
+package pkg
 
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/scm-manager/plugin-center-api"
 	"io/fs"
 	"io/ioutil"
 	"net/http"
@@ -25,7 +26,7 @@ func init() {
 }
 
 func createTestOidcHandler(t *testing.T, server *OidcTestServer) *OidcHandler {
-	static, err := fs.Sub(assets, "html")
+	static, err := fs.Sub(main.assets, "html")
 	assert.NoError(t, err)
 
 	mockOIDC := server.server
@@ -87,7 +88,7 @@ func authenticate(t *testing.T, server *OidcTestServer, requestUrl string, autho
 }
 
 func TestNewOIDCHandlerWithoutIssuer(t *testing.T) {
-	_, err := NewOIDCHandler(OidcConfiguration{}, assets)
+	_, err := NewOIDCHandler(OidcConfiguration{}, main.assets)
 	assert.Contains(t, err.Error(), "provider")
 }
 
@@ -101,7 +102,7 @@ func TestNewOIDCHandlerWithoutTemplates(t *testing.T) {
 		"secret",
 		"http://localhost:8080/api/v1/auth/oidc/callback",
 		true,
-	}, assets)
+	}, main.assets)
 	assert.Contains(t, err.Error(), "error template")
 }
 

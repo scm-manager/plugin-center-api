@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -8,7 +8,7 @@ import (
 func TestFailureForNotExistingPluginsFolder(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "no/such/folder"}
 
-	_, err := scanDirectory(configuration.DescriptorDirectory)
+	_, err := ScanDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err, "expected error missing", err)
 }
@@ -16,7 +16,7 @@ func TestFailureForNotExistingPluginsFolder(t *testing.T) {
 func TestIfReleaseFilesAreRead(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
 
-	plugins, err := scanDirectory(configuration.DescriptorDirectory)
+	plugins, err := ScanDirectory(configuration.DescriptorDirectory)
 
 	assert.Nil(t, err, "unexpected error reading directory", err)
 	assert.Len(t, plugins, 4, "wrong number of plugins")
@@ -25,7 +25,7 @@ func TestIfReleaseFilesAreRead(t *testing.T) {
 func TestIfPluginMetadataIsRead(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
 
-	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugins, _ := ScanDirectory(configuration.DescriptorDirectory)
 	plugin := findPluginByName(plugins, "scm-auth-ldap-plugin")
 
 	assert.Equal(t, "scm-auth-ldap-plugin", plugin.Name)
@@ -38,7 +38,7 @@ func TestIfPluginMetadataIsRead(t *testing.T) {
 func TestIfReleasesAreRead(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
 
-	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugins, _ := ScanDirectory(configuration.DescriptorDirectory)
 	plugin := findPluginByName(plugins, "scm-cas-plugin")
 
 	assert.Equal(t, 2, len(plugin.Releases), "wrong number of releases")
@@ -54,7 +54,7 @@ func TestIfReleasesAreRead(t *testing.T) {
 func TestReleasesAreSorted(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
 
-	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugins, _ := ScanDirectory(configuration.DescriptorDirectory)
 	plugin := findPluginByName(plugins, "scm-script-plugin")
 
 	assert.Equal(t, 3, len(plugin.Releases), "wrong number of releases")
@@ -66,7 +66,7 @@ func TestReleasesAreSorted(t *testing.T) {
 func TestIfDependenciesAreRead(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugins"}
 
-	plugins, _ := scanDirectory(configuration.DescriptorDirectory)
+	plugins, _ := ScanDirectory(configuration.DescriptorDirectory)
 	plugin := findPluginByName(plugins, "scm-cas-plugin")
 
 	release := plugin.Releases[0]

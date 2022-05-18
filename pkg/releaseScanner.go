@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"github.com/pkg/errors"
@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func scanDirectory(directory string) ([]Plugin, error) {
+func ScanDirectory(directory string) ([]Plugin, error) {
 
 	var plugins []Plugin
 

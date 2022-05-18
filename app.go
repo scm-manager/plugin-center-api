@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/scm-manager/plugin-center-api/pkg"
 	"io/fs"
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 var assets embed.FS
 
 func main() {
-	configuration := readConfiguration()
+	configuration := pkg.ReadConfiguration()
 	r := configureRouter(configuration)
 
 	log.Println("start plugin center api on port", configuration.Port)
@@ -32,11 +33,13 @@ func getListenerAddress(port int) string {
 	return ":" + strconv.Itoa(port)
 }
 
-func configureRouter(configuration Configuration) *mux.Router {
-	plugins, err := scanDirectory(configuration.DescriptorDirectory)
+func configureRouter(configuration pkg.Configuration) *mux.Router {
+	plugins, err := pkg.ScanDirectory(configuration.DescriptorDirectory)
 	if err != nil {
 		log.Fatalln("could not parse plugins", err)
 	}
+
+	// TODO: scan plugin sets or die
 
 	static, err := fs.Sub(assets, "html")
 	if err != nil {
@@ -51,7 +54,7 @@ func configureRouter(configuration Configuration) *mux.Router {
 
 	// oidc
 	if configuration.Oidc.IsEnabled() {
-		oidc, err := NewOIDCHandler(configuration.Oidc, static)
+		oidc, err := pkg.NewOIDCHandler(configuration.Oidc, static)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -66,8 +69,8 @@ func configureRouter(configuration Configuration) *mux.Router {
 	}
 
 	// api
-	r.Handle("/api/v1/plugins/{version}", authentication(NewPluginHandler(plugins)))
-	r.Handle("/api/v1/download/{plugin}/{version}", authentication(NewDownloadHandler(plugins)))
+	r.Handle("/api/v1/plugins/{version}", authentication(pkg.NewPluginHandler(plugins)))
+	r.Handle("/api/v1/download/{plugin}/{version}", authentication(pkg.NewDownloadHandler(plugins)))
 
 	// static assets
 	r.PathPrefix("/static").Handler(http.FileServer(http.FS(static)))

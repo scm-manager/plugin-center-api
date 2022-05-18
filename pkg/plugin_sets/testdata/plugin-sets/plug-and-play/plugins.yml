@@ -1,0 +1,5 @@
+id: plug-and-play
+plugins:
+  - scm-auth-ldap-plugin
+  - scm-script-plugin
+  - scm-editor-plugin

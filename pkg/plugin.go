@@ -1,4 +1,4 @@
-package main
+package pkg
 
 type Conditions struct {
 	Os         []string `yaml:"os"`
