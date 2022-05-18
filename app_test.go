@@ -20,3 +20,17 @@ func TestConfigureRouterWithOidc(t *testing.T) {
 	r := configureRouter(configuration)
 	assert.NotNil(t, r)
 }
+
+func TestGetListenerAddress(t *testing.T) {
+	address := getListenerAddress(42)
+
+	assert.Equal(t, ":42", address)
+}
+
+func TestGetListenerAddress_shouldSetLocalhostIfStageIsDevelopment(t *testing.T) {
+	t.Setenv("STAGE", "development")
+
+	address := getListenerAddress(42)
+
+	assert.Equal(t, "127.0.0.1:42", address)
+}
