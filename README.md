@@ -14,3 +14,19 @@ The following parameters can be configured:
 | descriptor-directory  | CONFIG_DESCRIPTOR_DIRECTORY  | - |
 | plugin-sets-directory | CONFIG_PLUGIN_SETS_DIRECTORY | - |
 | port                  | CONFIG_PORT                  | 8000 |
+
+## Test locally
+
+1. Build executable:
+   ```
+   go build -a -tags netgo -ldflags "-w -extldflags \'-static\'" -o target/plugin-center-api *.go
+   ```
+2. Clone `website` repository directly into project's root folder
+3. Build docker image:
+   ```
+   docker build -t scmmanager/plugin-center-api .
+   ```
+4. Run plugin-center-api:
+   ```
+   docker run -p 8000:8000 -d scmmanager/plugin-center-api
+   ```
