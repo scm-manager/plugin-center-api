@@ -15,8 +15,8 @@ func TestPluginHandlerHasEmbeddedCollections(t *testing.T) {
 	var response Response
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, response.EmbeddedPlugins["plugins"])
-	assert.Len(t, response.EmbeddedPlugins["plugin-sets"], 2)
+	assert.NotEmpty(t, response.Embedded["plugins"])
+	assert.Len(t, response.Embedded["plugin-sets"], 2)
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
@@ -71,7 +71,7 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 	var response Response
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Len(t, response.EmbeddedPlugins["plugin-sets"], 1)
+	assert.Len(t, response.Embedded["plugin-sets"], 1)
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
@@ -119,4 +119,22 @@ func TestPluginHandlerGetsRightDataForCloudoguPlugin(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"version":"2.0"`)
 	assert.Contains(t, rr.Body.String(), `"type":"CLOUDOGU"`)
 	assert.Contains(t, rr.Body.String(), `"install":{"href":"myCloudogu.com/install/my_plugin"}`)
+}
+
+func TestPluginHandlerReturnsPluginsSets(t *testing.T) {
+	rr := initRouter(t, "/api/v1/plugins/2.0.0?os=linux&arch=64", "", NewPluginHandler(testData, testDataPluginSets))
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var response Response
+	err := json.Unmarshal(rr.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Len(t, response.Embedded["plugin-sets"], 1)
+
+	println(rr.Body.String())
+	assert.Contains(t, rr.Body.String(), `"id":"plug-and-play"`)
+	assert.Contains(t, rr.Body.String(), `"sequence":1`)
+	assert.Contains(t, rr.Body.String(), `"plugins":["scm-editor-plugin","scm-readme-plugin"]`)
+	assert.Contains(t, rr.Body.String(), `"de":{"name":"Anklicken und loslegen","features":["Merkmal 1","Merkmal 2","Merkmal 3"]`)
+	assert.Contains(t, rr.Body.String(), `"en":{"name":"Plug'n Play","features":["Feature 1","Feature 2","Feature 3"]`)
 }

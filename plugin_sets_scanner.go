@@ -50,6 +50,7 @@ func readPluginSetDirectory(pluginSetDirectory string) (*PluginSet, error) {
 	pluginSet := PluginSet{
 		Id:           plugins.Id,
 		Versions:     plugins.Versions,
+		Sequence:     plugins.Sequence,
 		Plugins:      plugins.Plugins,
 		Descriptions: make(map[string]Description),
 	}
@@ -79,6 +80,9 @@ func readPluginsYml(pluginsYmlPath string) (Plugins, error) {
 	}
 	if plugins.Versions.Value == "" {
 		return Plugins{}, errors.New(fmt.Sprintf("versions is missing at %s", pluginsYmlPath))
+	}
+	if plugins.Sequence < 1 {
+		return Plugins{}, errors.New(fmt.Sprintf("sequence is missing or less than one at %s", pluginsYmlPath))
 	}
 	if len(plugins.Plugins) == 0 {
 		return Plugins{}, errors.New(fmt.Sprintf("plugins are missing at %s", pluginsYmlPath))

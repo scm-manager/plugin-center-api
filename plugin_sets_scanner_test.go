@@ -37,6 +37,22 @@ func TestScanDirectory_shouldFailIfVersionsIsMissing(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestScanDirectory_shouldFailIfSequenceIsMissing(t *testing.T) {
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-sequence"}
+
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
+func TestScanDirectory_shouldFailIfSequenceIsLessThanOne(t *testing.T) {
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-sequence-lt-one"}
+
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
 func TestScanDirectory_shouldFailIfPluginsAreMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-plugins"}
 

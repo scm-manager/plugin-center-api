@@ -1,3 +1,4 @@
 id: administration-and-management
+sequence: 1
 plugins:
   - scm-cas-plugin

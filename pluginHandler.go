@@ -36,10 +36,10 @@ type PluginResult struct {
 	Links                Links        `json:"_links"`
 }
 
-type Embedded map[string]interface{}
+type EmbeddedObjects map[string]interface{}
 
 type Response struct {
-	EmbeddedPlugins Embedded `json:"_embedded"`
+	Embedded EmbeddedObjects `json:"_embedded"`
 }
 
 type RequestConditions struct {
@@ -98,7 +98,7 @@ func NewPluginHandler(plugins []Plugin, pluginSets []PluginSet) http.HandlerFunc
 		}
 		embedded["plugin-sets"] = pluginSetResults
 
-		response := Response{EmbeddedPlugins: embedded}
+		response := Response{Embedded: embedded}
 
 		w.Header().Add("Content-Type", "application/json")
 

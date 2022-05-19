@@ -1,5 +1,6 @@
 id: plug-and-play
 versions: ">=2.0.0 <2.30.0"
+sequence: 2
 plugins:
   - scm-auth-ldap-plugin
   - scm-script-plugin

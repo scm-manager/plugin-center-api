@@ -99,6 +99,7 @@ var testDataPluginSets = []PluginSet{
 	{
 		Id:       "plug-and-play",
 		Versions: MustParseVersionRange(">=2.0.0 <3.0.0"),
+		Sequence: 1,
 		Plugins:  []string{"scm-editor-plugin", "scm-readme-plugin"},
 		Descriptions: map[string]Description{
 			"en": {
@@ -114,6 +115,7 @@ var testDataPluginSets = []PluginSet{
 	{
 		Id:       "administration-and-management",
 		Versions: MustParseVersionRange(">=2.0.1 <3.0.0"),
+		Sequence: 2,
 		Plugins:  []string{"scm-cas-plugin"},
 		Descriptions: map[string]Description{
 			"en": {
