@@ -1,4 +1,4 @@
-package pkg
+package main
 
 import (
 	"fmt"
@@ -108,7 +108,9 @@ func (h *DownloadHandler) copyHttpStream(release *Release, pluginName string, pl
 		http.Error(w, "could not read plugin from target", http.StatusServiceUnavailable)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 	w.Header().Add("Content-Disposition", `attachment; filename="`+pluginName+`.smp"`)
 	written, err := io.Copy(w, resp.Body)
 	if err != nil {

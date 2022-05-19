@@ -1,4 +1,4 @@
-package plugin_sets
+package main
 
 import (
 	"encoding/json"

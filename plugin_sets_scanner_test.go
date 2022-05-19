@@ -1,79 +1,78 @@
-package plugin_sets
+package main
 
 import (
-	"github.com/scm-manager/plugin-center-api/pkg"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestScanDirectory_shouldFailIfDirectoryDoesNotExist(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "no/such/folder"}
+	configuration := Configuration{DescriptorDirectory: "no/such/folder"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfPluginsYmlDoesNotExist(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-plugins-yml"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-plugins-yml"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfIdIsMissing(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-id"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-id"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfVersionsIsMissing(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-versions"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-versions"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfPluginsAreMissing(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-plugins"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-plugins"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfNoDescriptionYmlExist(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-description-yml"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-description-yml"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfNameIsMissing(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-name"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-name"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldFailIfFeaturesAreMissing(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-features"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-features"}
 
-	_, err := ScanDirectory(configuration.DescriptorDirectory)
+	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
 }
 
 func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
 
-	pluginSets, err := ScanDirectory(configuration.DescriptorDirectory)
+	pluginSets, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.NoError(t, err)
 	assert.Len(t, pluginSets, 2)
@@ -91,9 +90,9 @@ func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
 }
 
 func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
-	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets"}
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
 
-	pluginSets, _ := ScanDirectory(configuration.DescriptorDirectory)
+	pluginSets, _ := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 	pluginSet := findPluginSetById(pluginSets, "plug-and-play")
 
 	assert.Len(t, pluginSet.Plugins, 3)

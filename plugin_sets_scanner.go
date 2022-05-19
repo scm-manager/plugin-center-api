@@ -1,15 +1,16 @@
-package plugin_sets
+package main
 
 import (
 	"fmt"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
 
-func ScanDirectory(directory string) ([]PluginSet, error) {
+func scanPluginSetsDirectory(directory string) ([]PluginSet, error) {
 	var pluginSets []PluginSet
 
 	pluginSetsDirectory, err := ioutil.ReadDir(directory)
@@ -29,6 +30,8 @@ func ScanDirectory(directory string) ([]PluginSet, error) {
 }
 
 func readPluginSetDirectory(pluginSetDirectory string) (*PluginSet, error) {
+	log.Println("reading plugin set from", pluginSetDirectory)
+
 	pluginSetYml := filepath.Join(pluginSetDirectory, "plugins.yml")
 	if _, err := os.Stat(pluginSetYml); os.IsNotExist(err) {
 		return nil, errors.Wrapf(err, "directory %s does not contain plugins.yml", pluginSetDirectory)

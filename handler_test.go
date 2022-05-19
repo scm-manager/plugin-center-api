@@ -1,4 +1,4 @@
-package pkg
+package main
 
 import (
 	"context"
@@ -92,5 +92,23 @@ var testData = []Plugin{
 			},
 		},
 		Author: "Microsoft",
+	},
+}
+
+var testDataPluginSets = []PluginSet{
+	{
+		Id:       "plug-and-play",
+		Versions: MustParseVersionRange(">=2.0.0 <3.0.0"),
+		Plugins:  []string{"scm-editor-plugin", "scm-readme-plugin"},
+		Descriptions: map[string]Description{
+			"en": {
+				Name:     "Plug'n Play",
+				Features: []string{"Feature 1", "Feature 2", "Feature 3"},
+			},
+			"de": {
+				Name:     "Anklicken und loslegen",
+				Features: []string{"Merkmal 1", "Merkmal 2", "Merkmal 3"},
+			},
+		},
 	},
 }

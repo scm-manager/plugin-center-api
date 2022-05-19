@@ -1,4 +1,4 @@
-package pkg
+package main
 
 import (
 	"github.com/kelseyhightower/envconfig"
@@ -27,7 +27,7 @@ func (oc OidcConfiguration) IsEnabled() bool {
 	return oc.Issuer != ""
 }
 
-func ReadConfiguration() Configuration {
+func readConfiguration() Configuration {
 	configPath := os.Getenv("CONFIG")
 	if configPath == "" {
 		configPath = "config.yaml"

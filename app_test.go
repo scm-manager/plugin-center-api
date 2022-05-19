@@ -1,23 +1,22 @@
 package main
 
 import (
-	"github.com/scm-manager/plugin-center-api/pkg"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestConfigureRouter(t *testing.T) {
-	configuration := pkg.readConfiguration()
+	configuration := readConfiguration()
 	r := configureRouter(configuration)
 	assert.NotNil(t, r)
 }
 
 func TestConfigureRouterWithOidc(t *testing.T) {
-	server := pkg.createOidcTestServer()
+	server := createOidcTestServer()
 	defer server.Close()
 	t.Setenv("CONFIG_OIDC_ISSUER", server.URL)
 
-	configuration := pkg.readConfiguration()
+	configuration := readConfiguration()
 	r := configureRouter(configuration)
 	assert.NotNil(t, r)
 }

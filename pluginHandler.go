@@ -1,7 +1,8 @@
-package pkg
+package main
 
 import (
 	"encoding/json"
+	"github.com/blang/semver/v4"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-version"
 	"github.com/prometheus/client_golang/prometheus"
@@ -35,19 +36,18 @@ type PluginResult struct {
 	Links                Links        `json:"_links"`
 }
 
-type PluginResults []PluginResult
-
-type Embedded map[string]PluginResults
+type Embedded map[string]interface{}
 
 type Response struct {
 	EmbeddedPlugins Embedded `json:"_embedded"`
 }
 
 type RequestConditions struct {
-	Os      string
-	Arch    string
-	Jre     string
-	Version version.Version
+	Os       string
+	Arch     string
+	Jre      string
+	Language string
+	Version  version.Version
 }
 
 var (
@@ -59,7 +59,7 @@ var (
 	})
 )
 
-func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
+func NewPluginHandler(plugins []Plugin, pluginSets []PluginSet) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var pluginResults []PluginResult
 
@@ -88,8 +88,16 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			pluginResults = appendIfOk(pluginResults, plugin, requestConditions, urlGenerator, authenticated)
 		}
 
-		embedded := make(map[string]PluginResults)
+		embedded := make(map[string]interface{})
 		embedded["plugins"] = pluginResults
+
+		var pluginSetResults []PluginSet
+
+		for _, pluginSet := range pluginSets {
+			pluginSetResults = appendPluginSetIfOk(pluginSetResults, pluginSet, requestConditions)
+		}
+		embedded["plugin-sets"] = pluginSetResults
+
 		response := Response{EmbeddedPlugins: embedded}
 
 		w.Header().Add("Content-Type", "application/json")
@@ -215,4 +223,15 @@ func nullToEmpty(strings []string) []string {
 	} else {
 		return strings
 	}
+}
+
+func appendPluginSetIfOk(results []PluginSet, pluginSet PluginSet, conditions RequestConditions) []PluginSet {
+	v, err := semver.New(conditions.Version.String())
+	if err != nil {
+		return results
+	}
+	if !pluginSet.Versions.Contains(Version{Version: *v}) {
+		return results
+	}
+	return append(results, pluginSet)
 }
