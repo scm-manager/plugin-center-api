@@ -111,4 +111,15 @@ var testDataPluginSets = []PluginSet{
 			},
 		},
 	},
+	{
+		Id:       "administration-and-management",
+		Versions: MustParseVersionRange(">=2.0.1 <3.0.0"),
+		Plugins:  []string{"scm-cas-plugin"},
+		Descriptions: map[string]Description{
+			"en": {
+				Name:     "Administration and Management",
+				Features: []string{"Feature 1", "Feature 2", "Feature 3"},
+			},
+		},
+	},
 }

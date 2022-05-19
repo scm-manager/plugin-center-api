@@ -16,7 +16,7 @@ func TestPluginHandlerHasEmbeddedCollections(t *testing.T) {
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, response.EmbeddedPlugins["plugins"])
-	assert.NotEmpty(t, response.EmbeddedPlugins["plugin-sets"])
+	assert.Len(t, response.EmbeddedPlugins["plugin-sets"], 2)
 }
 
 func TestPluginHandlerReturnsLatestPluginRelease(t *testing.T) {
@@ -68,6 +68,10 @@ func TestPluginHandlerFiltersForScmVersion(t *testing.T) {
 
 	assert.Contains(t, rr.Body.String(), `"version":"1.1"`)
 	assert.Contains(t, rr.Body.String(), `"minVersion":"2.0.0"`)
+	var response Response
+	err := json.Unmarshal(rr.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Len(t, response.EmbeddedPlugins["plugin-sets"], 1)
 }
 
 func TestPluginHandlerFiltersForOs(t *testing.T) {
