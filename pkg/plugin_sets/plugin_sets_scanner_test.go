@@ -22,8 +22,48 @@ func TestScanDirectory_shouldFailIfPluginsYmlDoesNotExist(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestScanDirectory_shouldFailIfIdIsMissing(t *testing.T) {
+	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-id"}
+
+	_, err := ScanDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
+func TestScanDirectory_shouldFailIfVersionsIsMissing(t *testing.T) {
+	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-versions"}
+
+	_, err := ScanDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
+func TestScanDirectory_shouldFailIfPluginsAreMissing(t *testing.T) {
+	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-plugins"}
+
+	_, err := ScanDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
 func TestScanDirectory_shouldFailIfNoDescriptionYmlExist(t *testing.T) {
 	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-description-yml"}
+
+	_, err := ScanDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
+func TestScanDirectory_shouldFailIfNameIsMissing(t *testing.T) {
+	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-name"}
+
+	_, err := ScanDirectory(configuration.DescriptorDirectory)
+
+	assert.Error(t, err)
+}
+
+func TestScanDirectory_shouldFailIfFeaturesAreMissing(t *testing.T) {
+	configuration := pkg.Configuration{DescriptorDirectory: "testdata/plugin-sets-no-features"}
 
 	_, err := ScanDirectory(configuration.DescriptorDirectory)
 
@@ -37,6 +77,17 @@ func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, pluginSets, 2)
+
+	pluginSet := findPluginSetById(pluginSets, "plug-and-play")
+	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.0.0")))
+	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.29.9")))
+	assert.False(t, pluginSet.Versions.Contains(MustParseVersion("1.0.0")))
+	assert.False(t, pluginSet.Versions.Contains(MustParseVersion("2.30.0")))
+
+	pluginSet = findPluginSetById(pluginSets, "administration-and-management")
+	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.0.0")))
+	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.32.0")))
+	assert.False(t, pluginSet.Versions.Contains(MustParseVersion("1.0.0")))
 }
 
 func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {

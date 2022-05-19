@@ -3,6 +3,7 @@ module github.com/scm-manager/plugin-center-api
 go 1.17
 
 require (
+    github.com/blang/semver/v4 v4.0.0
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/coreos/go-oidc/v3 v3.1.0
 	github.com/gorilla/mux v1.7.3

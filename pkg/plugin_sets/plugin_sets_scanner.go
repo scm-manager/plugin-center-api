@@ -46,6 +46,7 @@ func readPluginSetDirectory(pluginSetDirectory string) (*PluginSet, error) {
 
 	pluginSet := PluginSet{
 		Id:           plugins.Id,
+		Versions:     plugins.Versions,
 		Plugins:      plugins.Plugins,
 		Descriptions: make(map[string]Description),
 	}
@@ -70,6 +71,15 @@ func readPluginsYml(pluginsYmlPath string) (Plugins, error) {
 	if err = yaml.Unmarshal(pluginsYml, &plugins); err != nil {
 		return Plugins{}, errors.Wrapf(err, "failed to unmarshal plugins.yml at %s", pluginsYmlPath)
 	}
+	if plugins.Id == "" {
+		return Plugins{}, errors.New(fmt.Sprintf("id is missing at %s", pluginsYmlPath))
+	}
+	if plugins.Versions.Value == "" {
+		return Plugins{}, errors.New(fmt.Sprintf("versions is missing at %s", pluginsYmlPath))
+	}
+	if len(plugins.Plugins) == 0 {
+		return Plugins{}, errors.New(fmt.Sprintf("plugins are missing at %s", pluginsYmlPath))
+	}
 	return plugins, nil
 }
 
@@ -81,6 +91,12 @@ func readDescriptionsYml(descriptionsYmlPath string) (Description, error) {
 	var description Description
 	if err = yaml.Unmarshal(descriptionYml, &description); err != nil {
 		return Description{}, errors.Wrapf(err, "failed to unmarshal description_*.yml at %s", descriptionsYmlPath)
+	}
+	if description.Name == "" {
+		return Description{}, errors.New(fmt.Sprintf("name is missing at %s", descriptionsYmlPath))
+	}
+	if len(description.Features) == 0 {
+		return Description{}, errors.New(fmt.Sprintf("features are missing at %s", descriptionsYmlPath))
 	}
 	return description, nil
 }

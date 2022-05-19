@@ -1,8 +1,9 @@
 package plugin_sets
 
 type Plugins struct {
-	Id      string   `yaml:"id"`
-	Plugins []string `yaml:"plugins"`
+	Id       string       `yaml:"id"`
+	Versions VersionRange `yaml:"versions"`
+	Plugins  []string     `yaml:"plugins"`
 }
 
 type Description struct {
@@ -14,6 +15,7 @@ type Descriptions map[string]Description
 
 type PluginSet struct {
 	Id           string
+	Versions     VersionRange
 	Plugins      []string
 	Descriptions Descriptions
 }
