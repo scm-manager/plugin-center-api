@@ -15,9 +15,10 @@ type Description struct {
 type Descriptions map[string]Description
 
 type PluginSet struct {
-	Id           string       `json:"id"`
-	Versions     VersionRange `json:"versions"`
-	Sequence     int          `json:"sequence"`
-	Plugins      []string     `json:"plugins"`
-	Descriptions Descriptions `json:"descriptions"`
+	Id           string            `json:"id"`
+	Versions     VersionRange      `json:"versions"`
+	Sequence     int               `json:"sequence"`
+	Plugins      []string          `json:"plugins"`
+	Descriptions Descriptions      `json:"descriptions"`
+	Images       map[string]string `json:"images"`
 }

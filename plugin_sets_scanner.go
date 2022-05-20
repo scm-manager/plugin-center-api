@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func scanPluginSetsDirectory(directory string) ([]PluginSet, error) {
@@ -53,7 +55,9 @@ func readPluginSetDirectory(pluginSetDirectory string) (*PluginSet, error) {
 		Sequence:     plugins.Sequence,
 		Plugins:      plugins.Plugins,
 		Descriptions: make(map[string]Description),
+		Images:       make(map[string]string),
 	}
+
 	for _, descriptionYml := range descriptionYmls {
 		description, err := readDescriptionsYml(descriptionYml)
 		if err != nil {
@@ -61,6 +65,10 @@ func readPluginSetDirectory(pluginSetDirectory string) (*PluginSet, error) {
 		}
 		lang := filepath.Base(descriptionYml)[12:14]
 		pluginSet.Descriptions[lang] = description
+	}
+
+	if err = appendImages(pluginSet.Images, pluginSetDirectory); err != nil {
+		return nil, err
 	}
 
 	return &pluginSet, nil
@@ -106,4 +114,21 @@ func readDescriptionsYml(descriptionsYmlPath string) (Description, error) {
 		return Description{}, errors.New(fmt.Sprintf("features are missing at %s", descriptionsYmlPath))
 	}
 	return description, nil
+}
+
+func appendImages(images map[string]string, pluginSetDirectory string) error {
+	imagePaths, err := filepath.Glob(filepath.Join(pluginSetDirectory, "*.svg"))
+	if err != nil || imagePaths == nil || len(imagePaths) == 0 {
+		log.Println("no images found at", pluginSetDirectory)
+		return nil
+	}
+	for _, imagePath := range imagePaths {
+		image, err := ioutil.ReadFile(imagePath)
+		if err != nil {
+			return errors.Wrapf(err, "failed to read image at %s", imagePath)
+		}
+		key := strings.TrimSuffix(filepath.Base(imagePath), filepath.Ext(imagePath))
+		images[key] = base64.StdEncoding.EncodeToString(image)
+	}
+	return nil
 }

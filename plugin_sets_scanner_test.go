@@ -133,6 +133,18 @@ func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
 	assert.Equal(t, "enable an advanced search and more neat tricks", english.Features[2])
 }
 
+func TestScanDirectory_shouldReadAllImageFiles(t *testing.T) {
+	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
+
+	pluginSets, _ := scanPluginSetsDirectory(configuration.DescriptorDirectory)
+	pluginSet := findPluginSetById(pluginSets, "administration-and-management")
+
+	assert.Len(t, pluginSet.Images, 3)
+	assert.NotEmpty(t, pluginSet.Images["check"])
+	assert.NotEmpty(t, pluginSet.Images["hover"])
+	assert.NotEmpty(t, pluginSet.Images["standard"])
+}
+
 func findPluginSetById(pluginSets []PluginSet, id string) *PluginSet {
 	for _, pluginSet := range pluginSets {
 		if id == pluginSet.Id {
