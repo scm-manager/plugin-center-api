@@ -91,15 +91,14 @@ func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
 	pluginSets, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.NoError(t, err)
-	assert.Len(t, pluginSets, 2)
+	assert.Len(t, pluginSets, 4)
 
 	pluginSet := findPluginSetById(pluginSets, "plug-and-play")
 	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.0.0")))
 	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.29.9")))
-	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.30.0")))
 	assert.False(t, pluginSet.Versions.Contains(MustParseVersion("1.0.0")))
 
-	pluginSet = findPluginSetById(pluginSets, "administration-and-management")
+	pluginSet = findPluginSetById(pluginSets, "administration")
 	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.0.0")))
 	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.32.0")))
 	assert.False(t, pluginSet.Versions.Contains(MustParseVersion("1.0.0")))
@@ -111,10 +110,10 @@ func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
 	pluginSets, _ := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 	pluginSet := findPluginSetById(pluginSets, "plug-and-play")
 
-	assert.Len(t, pluginSet.Plugins, 3)
-	assert.Equal(t, "scm-auth-ldap-plugin", pluginSet.Plugins[0])
-	assert.Equal(t, "scm-script-plugin", pluginSet.Plugins[1])
-	assert.Equal(t, "scm-editor-plugin", pluginSet.Plugins[2])
+	assert.Len(t, pluginSet.Plugins, 9)
+	assert.Equal(t, "scm-landingpage-plugin", pluginSet.Plugins[0])
+	assert.Equal(t, "scm-editor-plugin", pluginSet.Plugins[1])
+	assert.Equal(t, "scm-content-search-plugin", pluginSet.Plugins[2])
 
 	assert.Len(t, pluginSet.Descriptions, 2)
 
@@ -126,7 +125,7 @@ func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
 	assert.Equal(t, "Ermöglichen eine fortschrittliche Suche und weitere kleine Hilfsmittel", german.Features[2])
 
 	english := pluginSet.Descriptions["en"]
-	assert.Equal(t, "Plug'n Play", english.Name)
+	assert.Equal(t, "Plug and Play", english.Name)
 	assert.Len(t, english.Features, 3)
 	assert.Equal(t, "recommendations of SCM-Manager-developers", english.Features[0])
 	assert.Equal(t, "basic plugins for small to medium sized teams", english.Features[1])
@@ -137,11 +136,10 @@ func TestScanDirectory_shouldReadAllImageFiles(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
 
 	pluginSets, _ := scanPluginSetsDirectory(configuration.DescriptorDirectory)
-	pluginSet := findPluginSetById(pluginSets, "administration-and-management")
+	pluginSet := findPluginSetById(pluginSets, "administration")
 
-	assert.Len(t, pluginSet.Images, 3)
+	assert.Len(t, pluginSet.Images, 2)
 	assert.NotEmpty(t, pluginSet.Images["check"])
-	assert.NotEmpty(t, pluginSet.Images["hover"])
 	assert.NotEmpty(t, pluginSet.Images["standard"])
 }
 
