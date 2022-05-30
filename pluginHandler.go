@@ -43,11 +43,10 @@ type Response struct {
 }
 
 type RequestConditions struct {
-	Os       string
-	Arch     string
-	Jre      string
-	Language string
-	Version  version.Version
+	Os      string
+	Arch    string
+	Jre     string
+	Version version.Version
 }
 
 var (
