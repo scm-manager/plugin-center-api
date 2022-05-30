@@ -91,7 +91,7 @@ func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
 	pluginSets, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.NoError(t, err)
-	assert.Len(t, pluginSets, 4)
+	assert.Len(t, pluginSets, 2)
 
 	pluginSet := findPluginSetById(pluginSets, "plug-and-play")
 	assert.True(t, pluginSet.Versions.Contains(MustParseVersion("2.0.0")))
