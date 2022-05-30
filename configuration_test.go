@@ -14,6 +14,7 @@ func TestReadConfigurationFromConfigYaml(t *testing.T) {
 
 func TestReadConfigurationFromEnv(t *testing.T) {
 	t.Setenv("CONFIG_DESCRIPTOR_DIRECTORY", "/plugins")
+	t.Setenv("CONFIG_PLUGIN_SETS_DIRECTORY", "/plugin-sets")
 	t.Setenv("CONFIG_OIDC_ISSUER", "http://keycloak:8000")
 	t.Setenv("CONFIG_OIDC_CLIENT_ID", "pc")
 	t.Setenv("CONFIG_OIDC_CLIENT_SECRET", "secret123")
@@ -22,6 +23,7 @@ func TestReadConfigurationFromEnv(t *testing.T) {
 	config := readConfiguration()
 
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
+	assert.Equal(t, "/plugin-sets", config.PluginSetsDirectory)
 	assert.Equal(t, "http://keycloak:8000", config.Oidc.Issuer)
 	assert.Equal(t, "pc", config.Oidc.ClientID)
 	assert.Equal(t, "secret123", config.Oidc.ClientSecret)
@@ -34,6 +36,7 @@ func TestReadConfigurationFromNonDefaultPath(t *testing.T) {
 
 	config := readConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
+	assert.Equal(t, "/plugin-sets", config.PluginSetsDirectory)
 	assert.Equal(t, "http://localhost:8080/auth/realms/master", config.Oidc.Issuer)
 	assert.Equal(t, "plugin-center", config.Oidc.ClientID)
 	assert.Equal(t, "secret", config.Oidc.ClientSecret)
@@ -43,15 +46,19 @@ func TestReadConfigurationFromNonDefaultPath(t *testing.T) {
 func TestReadConfigurationWithoutConfigYaml(t *testing.T) {
 	workDir, err := os.Getwd()
 	assert.NoError(t, err)
-	defer os.Chdir(workDir)
+	defer func(dir string) {
+		_ = os.Chdir(dir)
+	}(workDir)
 
 	err = os.Chdir(os.TempDir())
 	assert.NoError(t, err)
 
 	t.Setenv("CONFIG_DESCRIPTOR_DIRECTORY", "/plugins")
+	t.Setenv("CONFIG_PLUGIN_SETS_DIRECTORY", "/plugin-sets")
 
 	config := readConfiguration()
 	assert.Equal(t, "/plugins", config.DescriptorDirectory)
+	assert.Equal(t, "/plugin-sets", config.PluginSetsDirectory)
 }
 
 func TestReadConfigurationFromConfigYamlAndEnvironment(t *testing.T) {
@@ -59,6 +66,7 @@ func TestReadConfigurationFromConfigYamlAndEnvironment(t *testing.T) {
 
 	config := readConfiguration()
 	assert.Equal(t, "resources/test/plugins", config.DescriptorDirectory)
+	assert.Equal(t, "resources/test/plugin-sets/proper-plugin-sets", config.PluginSetsDirectory)
 	assert.Equal(t, 8082, config.Port)
 }
 

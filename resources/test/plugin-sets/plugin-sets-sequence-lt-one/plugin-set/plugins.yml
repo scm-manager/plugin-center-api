@@ -1,0 +1,5 @@
+id: administration-and-management
+versions: ">= 2.0.0"
+sequence: 0
+plugins:
+  - scm-cas-plugin

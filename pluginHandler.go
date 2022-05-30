@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/blang/semver/v4"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-version"
 	"github.com/prometheus/client_golang/prometheus"
@@ -35,12 +36,10 @@ type PluginResult struct {
 	Links                Links        `json:"_links"`
 }
 
-type PluginResults []PluginResult
-
-type Embedded map[string]PluginResults
+type EmbeddedObjects map[string]interface{}
 
 type Response struct {
-	EmbeddedPlugins Embedded `json:"_embedded"`
+	Embedded EmbeddedObjects `json:"_embedded"`
 }
 
 type RequestConditions struct {
@@ -59,7 +58,7 @@ var (
 	})
 )
 
-func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
+func NewPluginHandler(plugins []Plugin, pluginSets []PluginSet) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var pluginResults []PluginResult
 
@@ -88,9 +87,17 @@ func NewPluginHandler(plugins []Plugin) http.HandlerFunc {
 			pluginResults = appendIfOk(pluginResults, plugin, requestConditions, urlGenerator, authenticated)
 		}
 
-		embedded := make(map[string]PluginResults)
+		embedded := make(map[string]interface{})
 		embedded["plugins"] = pluginResults
-		response := Response{EmbeddedPlugins: embedded}
+
+		var pluginSetResults []PluginSet
+
+		for _, pluginSet := range pluginSets {
+			pluginSetResults = appendPluginSetIfOk(pluginSetResults, pluginSet, requestConditions)
+		}
+		embedded["plugin-sets"] = pluginSetResults
+
+		response := Response{Embedded: embedded}
 
 		w.Header().Add("Content-Type", "application/json")
 
@@ -135,9 +142,9 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				pluginType = "SCM"
 			}
 
-      downloadUrl := ""
+			downloadUrl := ""
 			if !plugin.RequiresAuthentication() || authenticated {
-        downloadUrl = generator.DownloadUrl(plugin, release.Version)
+				downloadUrl = generator.DownloadUrl(plugin, release.Version)
 			}
 
 			avatarUrl := plugin.AvatarUrl
@@ -157,10 +164,10 @@ func appendIfOk(results []PluginResult, plugin Plugin, conditions RequestConditi
 				Conditions:           extractConditions(release.Conditions),
 				Dependencies:         nullToEmpty(release.Dependencies),
 				OptionalDependencies: nullToEmpty(release.OptionalDependencies),
-        Links: Links{
-          "download": Link{Href: downloadUrl},
-          "install":  Link{Href: release.InstallLink},
-        },
+				Links: Links{
+					"download": Link{Href: downloadUrl},
+					"install":  Link{Href: release.InstallLink},
+				},
 			}
 			return append(results, result)
 		}
@@ -215,4 +222,15 @@ func nullToEmpty(strings []string) []string {
 	} else {
 		return strings
 	}
+}
+
+func appendPluginSetIfOk(results []PluginSet, pluginSet PluginSet, conditions RequestConditions) []PluginSet {
+	v, err := semver.New(conditions.Version.String())
+	if err != nil {
+		return results
+	}
+	if !pluginSet.Versions.Contains(Version{Version: *v}) {
+		return results
+	}
+	return append(results, pluginSet)
 }

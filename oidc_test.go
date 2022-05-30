@@ -70,7 +70,7 @@ type OidcTestServer struct {
 }
 
 func (oe *OidcTestServer) Close() {
-	oe.server.Shutdown()
+	_ = oe.server.Shutdown()
 }
 
 func authenticate(t *testing.T, server *OidcTestServer, requestUrl string, authorization string) *httptest.ResponseRecorder {

@@ -1,0 +1,4 @@
+id: administration-and-management
+versions: ">= 2.0.0"
+sequence: 1
+plugins:
