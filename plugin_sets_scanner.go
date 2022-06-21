@@ -77,7 +77,7 @@ func readPluginSetDirectory(pluginSetDirectory string) (*PluginSet, error) {
 func readPluginsYml(pluginsYmlPath string) (Plugins, error) {
 	pluginsYml, err := ioutil.ReadFile(pluginsYmlPath)
 	if err != nil {
-		return Plugins{}, errors.Wrapf(err, "failed to read pugins.yml at %s", pluginsYmlPath)
+		return Plugins{}, errors.Wrapf(err, "failed to read plugins.yml at %s", pluginsYmlPath)
 	}
 	var plugins Plugins
 	if err = yaml.Unmarshal(pluginsYml, &plugins); err != nil {

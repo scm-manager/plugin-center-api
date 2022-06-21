@@ -5,47 +5,52 @@ import (
 	"testing"
 )
 
-func TestScanDirectory_shouldFailIfDirectoryDoesNotExist(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfDirectoryDoesNotExist(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "no/such/folder"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "could not open plugin sets directory")
 }
 
-func TestScanDirectory_shouldFailIfPluginsYmlDoesNotExist(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfPluginsYmlDoesNotExist(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-plugins-yml"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not contain plugins.yml")
 }
 
-func TestScanDirectory_shouldFailIfIdIsMissing(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfIdIsMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-id"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "id is missing at")
 }
 
-func TestScanDirectory_shouldFailIfVersionsIsMissing(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfVersionsIsMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-versions"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "versions is missing at")
 }
 
-func TestScanDirectory_shouldFailIfSequenceIsMissing(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfSequenceIsMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-sequence"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "sequence is missing or less than one at")
 }
 
-func TestScanDirectory_shouldFailIfSequenceIsLessThanOne(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfSequenceIsLessThanOne(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-sequence-lt-one"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
@@ -53,7 +58,7 @@ func TestScanDirectory_shouldFailIfSequenceIsLessThanOne(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestScanDirectory_shouldFailIfPluginsAreMissing(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfPluginsAreMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-plugins"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
@@ -61,23 +66,25 @@ func TestScanDirectory_shouldFailIfPluginsAreMissing(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestScanDirectory_shouldFailIfNoDescriptionYmlExist(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfNoDescriptionYmlExist(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-description-yml"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not contain any description_*.yml")
 }
 
-func TestScanDirectory_shouldFailIfNameIsMissing(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfNameIsMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-name"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "name is missing at")
 }
 
-func TestScanDirectory_shouldFailIfFeaturesAreMissing(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldFailIfFeaturesAreMissing(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/plugin-sets-no-features"}
 
 	_, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
@@ -85,7 +92,7 @@ func TestScanDirectory_shouldFailIfFeaturesAreMissing(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldReturnPluginSets(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
 
 	pluginSets, err := scanPluginSetsDirectory(configuration.DescriptorDirectory)
@@ -104,7 +111,7 @@ func TestScanDirectory_shouldReturnPluginSets(t *testing.T) {
 	assert.False(t, pluginSet.Versions.Contains(MustParseVersion("1.0.0")))
 }
 
-func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
 
 	pluginSets, _ := scanPluginSetsDirectory(configuration.DescriptorDirectory)
@@ -132,15 +139,56 @@ func TestScanDirectory_shouldReadAllDescriptionFiles(t *testing.T) {
 	assert.Equal(t, "enable an advanced search and more neat tricks", english.Features[2])
 }
 
-func TestScanDirectory_shouldReadAllImageFiles(t *testing.T) {
+func Test_scanPluginSetsDirectory_shouldReadAllImageFiles(t *testing.T) {
 	configuration := Configuration{DescriptorDirectory: "resources/test/plugin-sets/proper-plugin-sets"}
 
 	pluginSets, _ := scanPluginSetsDirectory(configuration.DescriptorDirectory)
-	pluginSet := findPluginSetById(pluginSets, "administration")
 
+	pluginSet := findPluginSetById(pluginSets, "administration")
 	assert.Len(t, pluginSet.Images, 2)
 	assert.NotEmpty(t, pluginSet.Images["check"])
 	assert.NotEmpty(t, pluginSet.Images["standard"])
+}
+
+func Test_readPluginsYml_shouldFailIfFileDoesNotExist(t *testing.T) {
+	yml, err := readPluginsYml("missing.yml")
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to read plugins.yml at")
+	assert.Empty(t, yml)
+}
+
+func Test_readPluginsYml_shouldFailIfYmlIsBroken(t *testing.T) {
+	yml, err := readPluginsYml("resources/test/plugin-sets/broken.yml")
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to unmarshal")
+	assert.Empty(t, yml)
+}
+
+func Test_readDescriptionsYml_shouldFailIfFileDoesNotExist(t *testing.T) {
+	yml, err := readDescriptionsYml("missing.yml")
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to read description_*.yml at")
+	assert.Empty(t, yml)
+}
+
+func Test_readDescriptionsYml_shouldFailIfYmlIsBroken(t *testing.T) {
+	yml, err := readDescriptionsYml("resources/test/plugin-sets/broken.yml")
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to unmarshal description_*.yml at")
+	assert.Empty(t, yml)
+}
+
+func Test_appendImages_shouldReturnNilIfNoImageExists(t *testing.T) {
+	var images map[string]string
+
+	err := appendImages(images, "resources/test/plugin-sets/plugin-set-no-images/plugin-set")
+
+	assert.NoError(t, err)
+	assert.Empty(t, images)
 }
 
 func findPluginSetById(pluginSets []PluginSet, id string) *PluginSet {
