@@ -77,7 +77,8 @@ pipeline {
       }
     }
 
-    stage('Sonarqube') {
+    /** Disable sonarqube till we know how to make it work inside the EcoSystem
+ /*stage('Sonarqube') {
       agent {
         node {
           label 'docker'
@@ -95,7 +96,7 @@ pipeline {
           waitForQualityGate abortPipeline: true
         }
       }
-    }
+    }*/
 
     stage('Docker') {
       agent {
